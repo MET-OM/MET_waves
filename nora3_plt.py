@@ -50,8 +50,8 @@ def plot_panarctic_map_mean(start_time,end_time,variable):
     
     url = 'https://thredds.met.no/thredds/dodsC/windsurfer/mywavewam3km_agg/wam3kmhindcastaggregated.ncml'
     ds = xr.open_dataset(url).sel(time=slice(start_time, end_time))
-    min_value = ds[variable].min()
-    max_value = ds[variable].max()
+    min_value = ds[variable].mean('time').min()
+    max_value = ds[variable].mean('time').max()
     fig, ax = plt.subplots()
     plt.axes(projection=ccrs.NorthPolarStereo(true_scale_latitude=70))
     ecco.plot_proj_to_latlon_grid(ds.longitude, ds.latitude, \
