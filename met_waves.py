@@ -57,7 +57,7 @@ def plot_panarctic_map(start_time, end_time, product, variable, method):
     # end_time   = end date for plotting e.g., '2005-01-09T18'
     # Product: 'nora3' or 'wam4'
     # variable: e.g., 'hs', 'tp', 'ff' for wind
-    # method: 'timestep' for plotting all timesteps for given period or 'mean' or 'max'
+    # method: 'timestep' for plotting all timesteps for given period or 'mean'
     # Overview of the NORAE3 wave variables is given in:
     # https://thredds.met.no/thredds/dodsC/windsurfer/mywavewam3km_agg/wam3kmhindcastaggregated.ncml.html
     if product == 'nora3':
