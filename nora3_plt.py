@@ -22,13 +22,52 @@ def plot_panarctic_map_timestep(start_time,end_time,variable):
     
     url = 'https://thredds.met.no/thredds/dodsC/windsurfer/mywavewam3km_agg/wam3kmhindcastaggregated.ncml'
     ds = xr.open_dataset(url).sel(time=slice(start_time, end_time))
-    min_value = ds[variable].min()
-    max_value = ds[variable].max()
-    for i in range(len(ds.time)):
-        print(ds.time.values[i])
-        fig, ax = plt.subplots()
-        plt.axes(projection=ccrs.NorthPolarStereo(true_scale_latitude=70))
-        ecco.plot_proj_to_latlon_grid(ds.longitude, ds.latitude, \
+    if variable == 'WEF':
+        WEF = 0.5*(ds.hs**2)*(0.85*ds.tp)
+        min_value = WEF.min()
+        max_value = WEF.max()
+        for i in range(len(ds.time)):
+            print(ds.time.values[i])
+            fig, ax = plt.subplots()
+            plt.axes(projection=ccrs.NorthPolarStereo(true_scale_latitude=70))
+            ecco.plot_proj_to_latlon_grid(ds.longitude, ds.latitude, \
+                                  WEF.loc[ds.time[i]], \
+                                  projection_type='stereo',\
+                                  plot_type = 'contourf', \
+                                  show_colorbar=True,
+                                  cmap = 'jet',
+                                  dx=1, dy=1,cmin=min_value, cmax=max_value,\
+                                  lat_lim=50);    
+            plt.title(str(ds.time.values[i]).split(':')[0]+'UTC')
+            plt.savefig(variable+str(ds.time.values[i]).split(':')[0]+'.png',bbox_inches = 'tight')
+            plt.close()
+    elif variable == 'WPD':
+        WPD = 0.5*1.225*(ds.ff**3)
+        min_value = WPD.min()
+        max_value = WPD.max()
+        for i in range(len(ds.time)):
+            print(ds.time.values[i])
+            fig, ax = plt.subplots()
+            plt.axes(projection=ccrs.NorthPolarStereo(true_scale_latitude=70))
+            ecco.plot_proj_to_latlon_grid(ds.longitude, ds.latitude, \
+                                  WPD.loc[ds.time[i]], \
+                                  projection_type='stereo',\
+                                  plot_type = 'contourf', \
+                                  show_colorbar=True,
+                                  cmap = 'jet',
+                                  dx=1, dy=1,cmin=min_value, cmax=max_value,\
+                                  lat_lim=50);    
+            plt.title(str(ds.time.values[i]).split(':')[0]+'UTC')
+            plt.savefig(variable+str(ds.time.values[i]).split(':')[0]+'.png',bbox_inches = 'tight')
+            plt.close()
+    else:
+        min_value = ds[variable].min()
+        max_value = ds[variable].max()
+        for i in range(len(ds.time)):
+            print(ds.time.values[i])
+            fig, ax = plt.subplots()
+            plt.axes(projection=ccrs.NorthPolarStereo(true_scale_latitude=70))
+            ecco.plot_proj_to_latlon_grid(ds.longitude, ds.latitude, \
                                   ds[variable].loc[ds.time[i]], \
                                   projection_type='stereo',\
                                   plot_type = 'contourf', \
@@ -36,9 +75,9 @@ def plot_panarctic_map_timestep(start_time,end_time,variable):
                                   cmap = 'jet',
                                   dx=1, dy=1,cmin=min_value, cmax=max_value,\
                                   lat_lim=50);    
-        plt.title(str(ds.time.values[i]).split(':')[0]+'UTC')
-        plt.savefig(variable+str(ds.time.values[i]).split(':')[0]+'.png',bbox_inches = 'tight')
-        plt.close()
+            plt.title(str(ds.time.values[i]).split(':')[0]+'UTC')
+            plt.savefig(variable+str(ds.time.values[i]).split(':')[0]+'.png',bbox_inches = 'tight')
+            plt.close()
 
 
 def plot_panarctic_map_mean(start_time,end_time,variable):
@@ -65,3 +104,6 @@ def plot_panarctic_map_mean(start_time,end_time,variable):
     plt.title('Mean:'+start_time +'--' +end_time)
     plt.savefig(variable+'avg'+start_time +'-' +end_time+'.png',bbox_inches = 'tight')
     plt.close()
+    
+    
+    
