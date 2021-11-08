@@ -1,9 +1,4 @@
-from nora3_plt import plot_panarctic_map_timestep, plot_panarctic_map_mean 
+from met_waves import plot_panarctic_map
 
-# plot timesteps
-plot_panarctic_map_timestep(start_time =  '2005-01-07T18',end_time = '2005-01-09T18',variable ='hs')
-#terminal command for gif: convert -delay 20 -loop 0 *png hs.gif
-
-
-# plot mean
-#plot_panarctic_map_mean(start_time =  '2005-01-07T18',end_time = '2005-01-09T18',variable ='hs')
+plot_panarctic_map(start_time='2021-11-08T23', end_time='2021-11-11T00',
+                   product='wam4c47', variable='hs', method='mean')
