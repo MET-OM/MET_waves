@@ -62,6 +62,6 @@ def plot_panarctic_map_mean(start_time,end_time,variable):
                                  cmap = 'jet',
                                  dx=1, dy=1,cmin=min_value, cmax=max_value,\
                                  lat_lim=50);    
-    plt.title('Mean:'+start_time +'-' +end_time)
+    plt.title('Mean:'+start_time +'--' +end_time)
     plt.savefig(variable+'avg'+start_time +'-' +end_time+'.png',bbox_inches = 'tight')
     plt.close()
