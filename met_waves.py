@@ -11,6 +11,7 @@ import cartopy.crs as ccrs
 import xarray as xr
 import ecco_v4_py as ecco
 import pandas as pd
+import numpy as np
 
 
 def estimate_WEF(hs, tp):
@@ -21,6 +22,52 @@ def estimate_WEF(hs, tp):
 def estimate_WPD(wnd):
     WPD = 0.5*1.225*(wnd**3)
     return WPD
+
+
+def distance_2points(lat1, lon1, lat2, lon2):
+    R = 6371.0
+    lat1 = np.radians(lat1)
+    lon1 = np.radians(lon1)
+    lat2 = np.radians(lat2)
+    lon2 = np.radians(lon2)
+    dlon = lon2 - lon1
+    dlat = lat2 - lat1
+    a = np.sin(dlat / 2)**2 + np.cos(lat1) * np.cos(lat2) * np.sin(dlon / 2)**2
+    c = 2 * np.arctan2(np.sqrt(a), np.sqrt(1 - a))
+    distance = R * c  # in km
+    return distance
+
+
+def find_nearest(lon_model, lat_model, lat0, lon0):
+    #print('find nearest point...')
+    dx = distance_2points(lat0, lon0, lat_model, lon_model)
+    rlat0 = dx.where(dx == dx.min(), drop=True).rlat
+    rlon0 = dx.where(dx == dx.min(), drop=True).rlon
+    return rlon0, rlat0
+
+
+def plot_timeseries(start_time, end_time, lon, lat, product, variable):
+    if product == 'NORA3':
+        url = 'https://thredds.met.no/thredds/dodsC/windsurfer/mywavewam3km_agg/wam3kmhindcastaggregated.ncml'
+    elif product == 'WAM4':
+        url = 'https://thredds.met.no/thredds/dodsC/sea/mywavewam4/mywavewam4_be'
+    elif product == 'WAM4C47':
+        url = 'https://thredds.met.no/thredds/dodsC/sea/mywavewam4/mywavewam4_c47_be'
+    date_list = pd.date_range(start=start_time, end=end_time, freq='H')
+    #var = xr.open_dataset(url)[variable].sel(time=slice(start_time, end_time))
+    lon_model = xr.open_dataset(url).longitude
+    lat_model = xr.open_dataset(url).latitude
+    var = xr.open_dataset(url)[variable]
+    var = var.sel(time=~var.get_index("time").duplicated())
+    var = var.sel(time=slice(start_time, end_time))
+    rlon, rlat = find_nearest(lon_model, lat_model, lat, lon)
+    var = var.sel(rlat=rlat, rlon=rlon)
+    fig, ax = plt.subplots()
+    var.plot()
+    plt.grid()
+    plt.title('Coordinates:'+str(lon)+','+str(lat), fontsize=16)
+    plt.savefig(variable+'_ts_'+start_time + '-'
+                + end_time+'.png', bbox_inches='tight')
 
 
 def plot_panarctic_map(start_time, end_time, product, variable, method):
