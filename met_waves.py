@@ -60,11 +60,11 @@ def plot_panarctic_map(start_time, end_time, product, variable, method):
     # method: 'timestep' for plotting all timesteps for given period or 'mean'
     # Overview of the NORAE3 wave variables is given in:
     # https://thredds.met.no/thredds/dodsC/windsurfer/mywavewam3km_agg/wam3kmhindcastaggregated.ncml.html
-    if product == 'nora3':
+    if product == 'NORA3':
         url = 'https://thredds.met.no/thredds/dodsC/windsurfer/mywavewam3km_agg/wam3kmhindcastaggregated.ncml'
-    elif product == 'wam4':
+    elif product == 'WAM4':
         url = 'https://thredds.met.no/thredds/dodsC/sea/mywavewam4/mywavewam4_be'
-    elif product == 'wam4c47':
+    elif product == 'WAM4C47':
         url = 'https://thredds.met.no/thredds/dodsC/sea/mywavewam4/mywavewam4_c47_be'
     date_list = pd.date_range(start=start_time, end=end_time, freq='H')
     #var = xr.open_dataset(url)[variable].sel(time=slice(start_time, end_time))
@@ -90,7 +90,7 @@ def plot_panarctic_map(start_time, end_time, product, variable, method):
                                           cmap='jet',
                                           dx=1, dy=1, cmin=min_value, cmax=max_value,
                                           lat_lim=50)
-            plt.title(str(var.time.values[i]).split(':')[0]+'UTC')
+            plt.title(product+','+str(var.time.values[i]).split(':')[0]+'UTC')
             plt.savefig(
                 variable+str(var.time.values[i]).split(':')[0]+'.png', bbox_inches='tight')
             plt.close()
@@ -106,7 +106,7 @@ def plot_panarctic_map(start_time, end_time, product, variable, method):
                                       dx=1, dy=1, cmin=var.mean('time').min(),
                                       cmax=var.mean('time').max(),
                                       lat_lim=50)
-        plt.title('Mean:'+start_time + '--' + end_time)
+        plt.title(product+','+'Mean:'+start_time + '--' + end_time)
         plt.savefig(variable+'avg'+start_time + '-'
                     + end_time+'.png', bbox_inches='tight')
         plt.close()
