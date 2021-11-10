@@ -13,9 +13,6 @@ import ecco_v4_py as ecco
 import pandas as pd
 import numpy as np
 import time
-#from subprocess import call
-#from nco import Nco
-
 
 def estimate_WEF(hs, tp):
     WEF = 0.5*(hs**2)*(0.85*tp)
