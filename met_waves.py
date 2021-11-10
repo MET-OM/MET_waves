@@ -14,6 +14,7 @@ import pandas as pd
 import numpy as np
 import time
 
+
 def estimate_WEF(hs, tp):
     WEF = 0.5*(hs**2)*(0.85*tp)
     return WEF
@@ -46,17 +47,22 @@ def find_nearest(lon_model, lat_model, lat0, lon0):
     return rlon0, rlat0
 
 
-def plot_timeseries(start_time, end_time, lon, lat, product, variable, write_csv):
-    start = time.time()
-    date_list = pd.date_range(start=start_time, end=end_time, freq='H')
-    df = pd.DataFrame({'time': date_list, variable: np.zeros(len(date_list))})
-    df = df.set_index('time')
+def url_agg(product):
     if product == 'NORA3':
         url = 'https://thredds.met.no/thredds/dodsC/windsurfer/mywavewam3km_agg/wam3kmhindcastaggregated.ncml'
     elif product == 'WAM4':
         url = 'https://thredds.met.no/thredds/dodsC/sea/mywavewam4/mywavewam4_be'
     elif product == 'WAM4C47':
         url = 'https://thredds.met.no/thredds/dodsC/sea/mywavewam4/mywavewam4_c47_be'
+    return url
+
+
+def plot_timeseries(start_time, end_time, lon, lat, product, variable, write_csv):
+    start = time.time()
+    date_list = pd.date_range(start=start_time, end=end_time, freq='H')
+    df = pd.DataFrame({'time': date_list, variable: np.zeros(len(date_list))})
+    df = df.set_index('time')
+    url = url_agg(product=product)
     ds = xr.open_dataset(url)
     units = ds[variable].units
     print('Find nearest point to lon.='+str(lon)+','+'lat.='+str(lat))
@@ -101,12 +107,7 @@ def plot_panarctic_map(start_time, end_time, product, variable, method):
     # method: 'timestep' for plotting all timesteps for given period or 'mean'
     # Overview of the NORAE3 wave variables is given in:
     # https://thredds.met.no/thredds/dodsC/windsurfer/mywavewam3km_agg/wam3kmhindcastaggregated.ncml.html
-    if product == 'NORA3':
-        url = 'https://thredds.met.no/thredds/dodsC/windsurfer/mywavewam3km_agg/wam3kmhindcastaggregated.ncml'
-    elif product == 'WAM4':
-        url = 'https://thredds.met.no/thredds/dodsC/sea/mywavewam4/mywavewam4_be'
-    elif product == 'WAM4C47':
-        url = 'https://thredds.met.no/thredds/dodsC/sea/mywavewam4/mywavewam4_c47_be'
+    url = url_agg(product=product)
     date_list = pd.date_range(start=start_time, end=end_time, freq='H')
     #var = xr.open_dataset(url)[variable].sel(time=slice(start_time, end_time))
     var = xr.open_dataset(url)[variable]
