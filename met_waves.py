@@ -12,6 +12,9 @@ import xarray as xr
 import ecco_v4_py as ecco
 import pandas as pd
 import numpy as np
+import time
+#from subprocess import call
+#from nco import Nco
 
 
 def estimate_WEF(hs, tp):
@@ -46,28 +49,50 @@ def find_nearest(lon_model, lat_model, lat0, lon0):
     return rlon0, rlat0
 
 
-def plot_timeseries(start_time, end_time, lon, lat, product, variable):
+def plot_timeseries(start_time, end_time, lon, lat, product, variable, write_csv):
+    start = time.time()
+    date_list = pd.date_range(start=start_time, end=end_time, freq='H')
+    df = pd.DataFrame({'time': date_list, variable: np.zeros(len(date_list))})
+    df = df.set_index('time')
     if product == 'NORA3':
         url = 'https://thredds.met.no/thredds/dodsC/windsurfer/mywavewam3km_agg/wam3kmhindcastaggregated.ncml'
     elif product == 'WAM4':
         url = 'https://thredds.met.no/thredds/dodsC/sea/mywavewam4/mywavewam4_be'
     elif product == 'WAM4C47':
         url = 'https://thredds.met.no/thredds/dodsC/sea/mywavewam4/mywavewam4_c47_be'
-    date_list = pd.date_range(start=start_time, end=end_time, freq='H')
-    #var = xr.open_dataset(url)[variable].sel(time=slice(start_time, end_time))
-    lon_model = xr.open_dataset(url).longitude
-    lat_model = xr.open_dataset(url).latitude
-    var = xr.open_dataset(url)[variable]
-    var = var.sel(time=~var.get_index("time").duplicated())
-    var = var.sel(time=slice(start_time, end_time))
-    rlon, rlat = find_nearest(lon_model, lat_model, lat, lon)
-    var = var.sel(rlat=rlat, rlon=rlon)
+    ds = xr.open_dataset(url)
+    units = ds[variable].units
+    print('Find nearest point to lon.='+str(lon)+','+'lat.='+str(lat))
+    rlon, rlat = find_nearest(ds.longitude, ds.latitude, lat, lon)
+    lon_near = ds.longitude.sel(rlat=rlat, rlon=rlon).values[0][0]
+    lat_near = ds.latitude.sel(rlat=rlat, rlon=rlon).values[0][0]
+    print('Found nearest: lon.='+str(lon_near)+',lat=' + str(lat_near))
+    print('Extract time series...:'+str(start_time)+'--->'+str(end_time))
+    for i in range(len(date_list)):
+        df[variable][i] = ds[variable].sel(
+            rlat=rlat, rlon=rlon).loc[date_list[i]].values[0][0]
+    if write_csv is True:
+        print('Write data to file...')
+        df.to_csv(variable+'_'+product+'_lon'
+                  + str(lon_near)+'_lat'+str(lat_near)+start_time + '-'
+                  + end_time+'.csv')
+    else:
+        pass
+    print('Plot time series...')
     fig, ax = plt.subplots()
-    var.plot()
+    df.plot()
     plt.grid()
-    plt.title('Coordinates:'+str(lon)+','+str(lat), fontsize=16)
-    plt.savefig(variable+'_ts_'+start_time + '-'
+    plt.ylabel('['+units+']', fontsize=14)
+    plt.title(product+',lon.='
+              + str(lon_near)+',lat.='+str(lat_near), fontsize=16)
+    plt.savefig(variable+'_'+product+'_lon'
+                + str(lon_near)+'_lat'+str(lat_near)+start_time + '-'
                 + end_time+'.png', bbox_inches='tight')
+    end = time.time()
+    hours, rem = divmod(end-start, 3600)
+    minutes, seconds = divmod(rem, 60)
+    print("{:0>2}:{:0>2}:{:05.2f}".format(int(hours), int(minutes), seconds))
+    return
 
 
 def plot_panarctic_map(start_time, end_time, product, variable, method):
