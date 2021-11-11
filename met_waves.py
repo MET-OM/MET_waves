@@ -206,7 +206,6 @@ def plot_2D_spectra(start_time, end_time, lon, lat, product):
         ax.set_zlim(SPEC.min(), SPEC.max())
         cbar = fig.colorbar(plot, ax=ax, shrink=0.6)
         cbar.ax.set_ylabel('m**2 s')
-        # Set axis labels
         ax.set_ylabel(r'$\mathregular{f[Hz]}$', labelpad=20)
         ax.set_xlabel(r'$\mathregular{\theta}[deg]$', labelpad=20)
         ax.set_title(product+"\n"+'lon.='+str(ds.longitude.values[xloc, yloc])+',lat='+str(ds.latitude.values[xloc, yloc])
