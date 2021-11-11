@@ -99,14 +99,16 @@ def plot_timeseries(start_time, end_time, lon, lat, product, variable, write_csv
 
 
 def plot_panarctic_map(start_time, end_time, product, variable, method):
-    # Plots in a panarctic map a given variable
-    # start_time = start date for plotting e.g., '2005-01-07T18'
-    # end_time   = end date for plotting e.g., '2005-01-09T18'
-    # Product: 'nora3' or 'wam4'
-    # variable: e.g., 'hs', 'tp', 'ff' for wind
-    # method: 'timestep' for plotting all timesteps for given period or 'mean'
-    # Overview of the NORAE3 wave variables is given in:
-    # https://thredds.met.no/thredds/dodsC/windsurfer/mywavewam3km_agg/wam3kmhindcastaggregated.ncml.html
+    """
+    Plots in a panarctic map a given variable
+    start_time = start date for plotting e.g., '2005-01-07T18'
+    end_time   = end date for plotting e.g., '2005-01-09T18'
+    Product: 'nora3' or 'wam4'
+    variable: e.g., 'hs', 'tp', 'ff' for wind
+    method: 'timestep' for plotting all timesteps for given period or 'mean'
+    Overview of the NORAE3 wave variables is given in:
+    https://thredds.met.no/thredds/dodsC/windsurfer/mywavewam3km_agg/wam3kmhindcastaggregated.ncml.html
+    """
     url = url_agg(product=product)
     date_list = pd.date_range(start=start_time, end=end_time, freq='H')
     #var = xr.open_dataset(url)[variable].sel(time=slice(start_time, end_time))
@@ -152,3 +154,10 @@ def plot_panarctic_map(start_time, end_time, product, variable, method):
         plt.savefig(variable+'avg'+start_time + '-'
                     + end_time+'.png', bbox_inches='tight')
         plt.close()
+
+
+def get_url(day):
+    url = 'https://thredds.met.no/thredds/dodsC/windsurfer/mywavewam3km_spectra/' + \
+        day.strftime('%Y') + '/'+day.strftime('%m') + \
+        '/SPC'+day.strftime('%Y%m%d')+'00.nc'
+    return url
