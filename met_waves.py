@@ -57,7 +57,7 @@ def url_agg(product):
     return url
 
 
-def plot_timeseries(start_time, end_time, lon, lat, product, variable, write_csv):
+def plot_timeseries(start_time, end_time, lon, lat, product, variable, write_csv, **plotargs):
     start = time.time()
     date_list = pd.date_range(start=start_time, end=end_time, freq='H')
     df = pd.DataFrame({'time': date_list, variable: np.zeros(len(date_list))})
@@ -82,12 +82,12 @@ def plot_timeseries(start_time, end_time, lon, lat, product, variable, write_csv
     else:
         pass
     print('Plot time series...')
-    fig, ax = plt.subplots()
-    df.plot()
-    plt.grid()
-    plt.ylabel('['+units+']', fontsize=14)
-    plt.title(product+',lon.='
-              + str(lon_near)+',lat.='+str(lat_near), fontsize=16)
+    fig, ax = plt.subplots(**plotargs)
+    df.plot(ax=ax)
+    ax.grid()
+    ax.set_ylabel('['+units+']', fontsize=14)
+    ax.set_title(product+',lon.='
+                 + str(lon_near)+',lat.='+str(lat_near), fontsize=16)
     plt.savefig(variable+'_'+product+'_lon'
                 + str(lon_near)+'_lat'+str(lat_near)+start_time + '-'
                 + end_time+'.png', bbox_inches='tight')
@@ -156,8 +156,65 @@ def plot_panarctic_map(start_time, end_time, product, variable, method):
         plt.close()
 
 
-def get_url(day):
-    url = 'https://thredds.met.no/thredds/dodsC/windsurfer/mywavewam3km_spectra/' + \
-        day.strftime('%Y') + '/'+day.strftime('%m') + \
-        '/SPC'+day.strftime('%Y%m%d')+'00.nc'
+def get_url(product, day):
+    if product == 'NORA3':
+        url = 'https://thredds.met.no/thredds/dodsC/windsurfer/mywavewam3km_spectra/' + \
+            day.strftime('%Y') + '/'+day.strftime('%m') + \
+            '/SPC'+day.strftime('%Y%m%d')+'00.nc'
     return url
+
+
+def plot_2D_spectra(start_time, end_time, lon, lat, product):
+    data = []
+    date_list = pd.date_range(start=start_time, end=end_time, freq='D')
+    for k in range(len(date_list)):  # loop over days
+        url = get_url(product, date_list[k])
+        ds = xr.open_dataset(url)
+        # Find the nearest grid point.
+        abslat = np.abs(ds.latitude-lat)
+        abslon = np.abs(ds.longitude-lon)
+        c = np.maximum(abslon, abslat)
+        ([xloc], [yloc]) = np.where(c == np.min(c))
+        print('Nearest point lon, lat:'
+              + str(ds.longitude.values[xloc, yloc])+','+str(ds.latitude.values[xloc, yloc]))
+        data.append(ds.SPEC[:, xloc, yloc, :, :])
+        SPEC = xr.concat(data, dim='time')
+    for i in range(SPEC.time.shape[0]):  # loop over SPEC time
+        z = SPEC[i, :, :].values
+        nrows, ncols = z.shape
+        y = ds.freq.values
+        x = ds.direction.values
+        ([x_peak], [y_peak]) = np.where(z == np.max(z))
+        x, y = np.meshgrid(x, y)
+        fig = plt.figure(figsize=(8, 6))
+        ax = plt.subplot(111, projection='3d')
+        ax.xaxis.pane.fill = False
+        ax.xaxis.pane.set_edgecolor('white')
+        ax.yaxis.pane.fill = False
+        ax.yaxis.pane.set_edgecolor('white')
+        ax.zaxis.pane.fill = False
+        ax.zaxis.pane.set_edgecolor('white')
+        ax.grid(False)
+        ax.w_zaxis.line.set_lw(0.)
+        ax.set_zticks([])
+        plot = ax.plot_surface(x, y, z, cmap='viridis', edgecolor='white',
+                               vmin=SPEC.min(), vmax=SPEC.max(), alpha=0.8)
+        ceb = ax.contourf(x, y, z, zdir='x', vmin=SPEC.min(),
+                          vmax=SPEC.max(), cmap='viridis', offset=0)
+        ceb = ax.contourf(x, y, z, zdir='y', vmin=SPEC.min(),
+                          vmax=SPEC.max(), cmap='viridis', offset=0.55)
+        ax.set_zlim(SPEC.min(), SPEC.max())
+        cbar = fig.colorbar(plot, ax=ax, shrink=0.6)
+        cbar.ax.set_ylabel('m**2 s')
+        # Set axis labels
+        ax.set_ylabel(r'$\mathregular{f[Hz]}$', labelpad=20)
+        ax.set_xlabel(r'$\mathregular{\theta}[deg]$', labelpad=20)
+        ax.set_title(product+"\n"+'lon.='+str(ds.longitude.values[xloc, yloc])+',lat='+str(ds.latitude.values[xloc, yloc])
+                     + "\n"+str(SPEC['time'].values[i]).split(':')[0]
+                     + "\n"
+                             + r'$\theta_{p}$='
+                     + str(ds.direction.values[x_peak].round(2))+'deg'
+                     + "\n"+r'$T_{p}$='+str((1/ds.freq.values[y_peak]).round(2))+'s', fontsize=16)
+        plt.savefig('SPEC_lon'+str(ds.longitude.values[xloc, yloc])+'lat'+str(ds.latitude.values[xloc, yloc])
+                    + str(SPEC['time'].values[i]).split(':')[0]+'.png', bbox_inches='tight')
+        plt.close()
