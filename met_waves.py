@@ -217,3 +217,29 @@ def plot_2D_spectra(start_time, end_time, lon, lat, product):
         plt.savefig('SPEC_lon'+str(ds.longitude.values[xloc, yloc])+'lat'+str(ds.latitude.values[xloc, yloc])
                     + str(SPEC['time'].values[i]).split(':')[0]+'.png', bbox_inches='tight')
         plt.close()
+
+
+def plot_topaz(date, variable):
+    url = 'https://thredds.met.no/thredds/dodsC/topaz/dataset-ran-arc-day-myoceanv2-be'
+    if variable == 'ice_speed':
+        var = xr.Dataset({"ice_speed": ((xr.open_dataset(url)[
+                         'uice'].loc[date])**2 + (xr.open_dataset(url)['vice'].loc[date])**2)**0.5})
+        var = var[variable]
+        var = var.assign_attrs(units='m s-1')
+    else:
+        var = xr.open_dataset(url)[variable].loc[date]
+    fig, ax = plt.subplots()
+    plt.axes(projection=ccrs.NorthPolarStereo(
+                    true_scale_latitude=70))
+    ecco.plot_proj_to_latlon_grid(var.longitude, var.latitude,
+                                  var,
+                                  projection_type='stereo',
+                                  plot_type='contourf',
+                                  show_colorbar=True,
+                                  cmap='ocean_r',
+                                  dx=1, dy=1, cmin=var.min(), cmax=var.max(),
+                                  lat_lim=50)
+    plt.title('Arctic Ocean Physics Reanalysis \n'
+              + str(date))
+    plt.savefig(variable+str(date)+'.png', bbox_inches='tight')
+    plt.close()
