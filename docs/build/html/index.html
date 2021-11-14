@@ -1,0 +1,244 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>Welcome to MET_waves’s documentation! &mdash; MET_waves latest documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="#" class="icon icon-home"> MET_waves
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <!-- Local TOC -->
+              <div class="local-toc"><ul>
+<li><a class="reference internal" href="#">Welcome to MET_waves’s documentation!</a></li>
+</ul>
+</div>
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="#">MET_waves</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="#" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>Welcome to MET_waves’s documentation!</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="_sources/index.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="welcome-to-met-waves-s-documentation">
+<h1>Welcome to MET_waves’s documentation!<a class="headerlink" href="#welcome-to-met-waves-s-documentation" title="Permalink to this headline">¶</a></h1>
+<p>Tools for data analysis and visualization of MET Norway (<a class="reference external" href="https://www.met.no/">https://www.met.no/</a>) wave datasets (e.g., NORA3, WAM4).
+The package is under preparation. Some examples are given below:</p>
+<p>Plot panarctic map:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">met_waves</span> <span class="kn">import</span> <span class="n">plot_panarctic_map</span>
+<span class="n">plot_panarctic_map</span><span class="p">(</span><span class="n">start_time</span><span class="o">=</span><span class="s1">&#39;2020-11-11T14&#39;</span><span class="p">,</span> <span class="n">end_time</span><span class="o">=</span><span class="s1">&#39;2020-11-11T15&#39;</span><span class="p">,</span><span class="n">product</span><span class="o">=</span><span class="s1">&#39;NORA3&#39;</span><span class="p">,</span> <span class="n">variable</span><span class="o">=</span><span class="s1">&#39;hs&#39;</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;timestep&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-rst notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+<a class="reference internal image-reference" href="_images/hs_nora3.png"><img alt="_images/hs_nora3.png" src="_images/hs_nora3.png" style="width: 400px;" /></a>
+<p>Plot time series of a grid point:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">met_waves</span> <span class="kn">import</span> <span class="n">plot_timeseries</span>
+<span class="n">plot_timeseries</span><span class="p">(</span><span class="n">start_time</span><span class="o">=</span><span class="s1">&#39;2007-11-08T12&#39;</span><span class="p">,</span> <span class="n">end_time</span><span class="o">=</span><span class="s1">&#39;2007-11-10T23&#39;</span><span class="p">,</span> <span class="n">lon</span><span class="o">=</span><span class="mf">3.20</span><span class="p">,</span> <span class="n">lat</span><span class="o">=</span><span class="mf">56.53</span><span class="p">,</span> <span class="n">product</span><span class="o">=</span><span class="s1">&#39;NORA3&#39;</span><span class="p">,</span> <span class="n">variable</span><span class="o">=</span><span class="s1">&#39;hs&#39;</span><span class="p">,</span> <span class="n">write_csv</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-rst notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+<a class="reference internal image-reference" href="_images/hs_NORA3_ts.png"><img alt="_images/hs_NORA3_ts.png" src="_images/hs_NORA3_ts.png" style="width: 400px;" /></a>
+<p>Plot 2D spectra of a grid point:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">met_waves</span> <span class="kn">import</span> <span class="n">plot_2D_spectra</span>
+<span class="n">plot_2D_spectra</span><span class="p">(</span><span class="n">start_time</span><span class="o">=</span><span class="s1">&#39;2007-11-08T23&#39;</span><span class="p">,</span> <span class="n">end_time</span><span class="o">=</span><span class="s1">&#39;2007-11-10T23&#39;</span><span class="p">,</span> <span class="n">lon</span><span class="o">=</span><span class="mf">3.20</span><span class="p">,</span><span class="n">lat</span><span class="o">=</span><span class="mf">56.53</span><span class="p">,</span> <span class="n">product</span><span class="o">=</span><span class="s1">&#39;NORA3&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-rst notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+<a class="reference internal image-reference" href="_images/spec_nora3.png"><img alt="_images/spec_nora3.png" src="_images/spec_nora3.png" style="width: 400px;" /></a>
+<p>Plot TOPAZ data:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">met_waves</span> <span class="kn">import</span> <span class="n">plot_topaz</span>
+<span class="n">plot_topaz</span><span class="p">(</span><span class="n">date</span><span class="o">=</span><span class="s1">&#39;1999-02-02&#39;</span><span class="p">,</span> <span class="n">variable</span><span class="o">=</span><span class="s1">&#39;fice&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-rst notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+<a class="reference internal image-reference" href="_images/fice_topaz.png"><img alt="_images/fice_topaz.png" src="_images/fice_topaz.png" style="width: 400px;" /></a>
+<div class="toctree-wrapper compound">
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2021, KonstantinChri.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
