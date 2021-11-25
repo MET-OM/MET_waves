@@ -57,6 +57,26 @@ def url_agg(product):
     return url
 
 
+def plot_NorthPolarStereo(product, var,lon, lat, min_value,max_value,method,ax=None):
+    if ax is None:
+        fig, ax = plt.subplots()
+
+    plt.axes(projection=ccrs.NorthPolarStereo(
+        true_scale_latitude=70))
+    ecco.plot_proj_to_latlon_grid(lon, lat,
+                                  var,
+                                  projection_type='stereo',
+                                  plot_type='contourf',
+                                  show_colorbar=True,
+                                  cmap='jet',
+                                  dx=1, dy=1, cmin=min_value, cmax=max_value,
+                                  lat_lim=50)     
+    if ax is None:
+        return fig, ax
+    else:
+        return ax
+
+
 def plot_timeseries(start_time, end_time, lon, lat, product, variable, write_csv, **plotargs):
     start = time.time()
     date_list = pd.date_range(start=start_time, end=end_time, freq='H')
@@ -124,37 +144,22 @@ def plot_panarctic_map(start_time, end_time, product, variable, method):
         for i in range(len(date_list)):
             print(date_list[i])
             fig, ax = plt.subplots()
-            plt.axes(projection=ccrs.NorthPolarStereo(
-                true_scale_latitude=70))
-            ecco.plot_proj_to_latlon_grid(lon, lat,
-                                          var.loc[date_list[i]],
-                                          projection_type='stereo',
-                                          plot_type='contourf',
-                                          show_colorbar=True,
-                                          cmap='jet',
-                                          dx=1, dy=1, cmin=min_value, cmax=max_value,
-                                          lat_lim=50)
-            plt.title(product+','+str(var.time.values[i]).split(':')[0]+'UTC')
-            plt.savefig(
-                variable+str(var.time.values[i]).split(':')[0]+'.png', bbox_inches='tight')
+            ax = plot_NorthPolarStereo(product=product, 
+                                  var=var.loc[date_list[i]],lon=lon, lat=lat, 
+                                  min_value=min_value,max_value=max_value,
+                                  method=method, ax=ax)
+            plt.title(product+','+str(var.time.values).split(':')[0]+'UTC')
+            plt.savefig(variable+str(var.time.values).split(':')[0]+'.png', bbox_inches='tight')
             plt.close()
     elif method == 'mean':
-        fig, ax = plt.subplots()
-        plt.axes(projection=ccrs.NorthPolarStereo(true_scale_latitude=70))
-        ecco.plot_proj_to_latlon_grid(lon, lat,
-                                      var.mean('time'),
-                                      projection_type='stereo',
-                                      plot_type='contourf',
-                                      show_colorbar=True,
-                                      cmap='jet',
-                                      dx=1, dy=1, cmin=var.mean('time').min(),
-                                      cmax=var.mean('time').max(),
-                                      lat_lim=50)
-        plt.title(product+','+'Mean:'+start_time + '--' + end_time)
-        plt.savefig(variable+'avg'+start_time + '-'
-                    + end_time+'.png', bbox_inches='tight')
+        ax = plot_NorthPolarStereo(product=product, 
+                                  var=var.mean('time'),lon=lon, lat=lat, 
+                                  min_value=var.mean('time').min(),
+                                  max_value=var.mean('time').max(),
+                                  method=method)
+        plt.title(product+',Mean:'+start_time+'--'+end_time)
+        plt.savefig(variable+'_Mean_'+start_time+'-'+end_time+'.png', bbox_inches='tight')
         plt.close()
-
 
 def get_url(product, day):
     if product == 'NORA3':
@@ -219,27 +224,41 @@ def plot_2D_spectra(start_time, end_time, lon, lat, product):
         plt.close()
 
 
-def plot_topaz(date, variable):
+def plot_topaz(start_time, end_time, variable, method):
     url = 'https://thredds.met.no/thredds/dodsC/topaz/dataset-ran-arc-day-myoceanv2-be'
+    date_list = pd.date_range(start=start_time, end=end_time, freq='D')
+    product = 'Arctic Ocean Physics Reanalysis'
     if variable == 'ice_speed':
         var = xr.Dataset({"ice_speed": ((xr.open_dataset(url)[
-                         'uice'].loc[date])**2 + (xr.open_dataset(url)['vice'].loc[date])**2)**0.5})
+                         'uice'].sel(time=slice(start_time, end_time)))**2 + (xr.open_dataset(url)['vice'].sel(time=slice(start_time, end_time)))**2)**0.5})
         var = var[variable]
         var = var.assign_attrs(units='m s-1')
     else:
-        var = xr.open_dataset(url)[variable].loc[date]
-    fig, ax = plt.subplots()
-    plt.axes(projection=ccrs.NorthPolarStereo(
-                    true_scale_latitude=70))
-    ecco.plot_proj_to_latlon_grid(var.longitude, var.latitude,
-                                  var,
-                                  projection_type='stereo',
-                                  plot_type='contourf',
-                                  show_colorbar=True,
-                                  cmap='ocean_r',
-                                  dx=1, dy=1, cmin=var.min(), cmax=var.max(),
-                                  lat_lim=50)
-    plt.title('Arctic Ocean Physics Reanalysis \n'
-              + str(date))
-    plt.savefig(variable+str(date)+'.png', bbox_inches='tight')
-    plt.close()
+        var = xr.open_dataset(url)[variable].sel(time=slice(start_time, end_time))
+        
+    if method == 'timestep':
+        min_value = var.min()
+        max_value = var.max()
+        print(max_value)
+        for i in range(len(date_list)):
+            print(date_list[i])
+            plot_NorthPolarStereo(product=product, 
+                                  var=var.loc[date_list[i]],lon=var.longitude,
+                                  lat=var.latitude, 
+                                  min_value=min_value,max_value=max_value,
+                                  method=method)
+            plt.title(product+','+str(date_list[i]))
+            plt.savefig(variable + str(date_list[i]) +'.png', bbox_inches='tight')
+            plt.close
+    elif method == 'mean':
+        plot_NorthPolarStereo(product=product, 
+                                  var=var.mean('time'),lon=var.longitude,
+                                  lat=var.latitude, 
+                                  min_value=var.mean('time').min(),
+                                  max_value=var.mean('time').max(),
+                                  method=method)
+        plt.title(product+'\n,Mean:'+start_time+'--'+end_time)
+        plt.savefig(variable+'_Mean_'+start_time+'-'+end_time+'.png', bbox_inches='tight')
+        plt.close()
+        
+
