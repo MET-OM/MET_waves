@@ -247,7 +247,7 @@ def plot_topaz(start_time, end_time, variable, method):
                                   lat=var.latitude, 
                                   min_value=min_value,max_value=max_value,
                                   method=method)
-            plt.title(product+','+str(date_list[i]))
+            plt.title(product+'\n '+str(date_list[i]))
             plt.savefig(variable + str(date_list[i]) +'.png', bbox_inches='tight')
             plt.close
     elif method == 'mean':
@@ -257,7 +257,7 @@ def plot_topaz(start_time, end_time, variable, method):
                                   min_value=var.mean('time').min(),
                                   max_value=var.mean('time').max(),
                                   method=method)
-        plt.title(product+'\n,Mean:'+start_time+'--'+end_time)
+        plt.title(product+'\n Mean:'+start_time+'--'+end_time)
         plt.savefig(variable+'_Mean_'+start_time+'-'+end_time+'.png', bbox_inches='tight')
         plt.close()
         
