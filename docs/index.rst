@@ -32,7 +32,7 @@ Plot time series of a NORA3 grid point (and write data to .csv if write_csv=True
 Plot 2D spectra of a NORA3 grid point::
 
    from met_waves import plot_2D_spectra
-   plot_2D_spectra(start_time='2007-11-08T23', end_time='2007-11-10T23', lon=3.20,lat=56.53, product='NORA3')
+   plot_2D_spectra(start_time='2007-11-08T23', end_time='2007-11-10T23', lon=3.20,lat=56.53, product='SPEC_NORA3')
 
 .. code-block:: rst
 
