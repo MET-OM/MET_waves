@@ -19,7 +19,7 @@ Plot panarctic map using NORA3 data::
   :width: 400
 
 
-Plot time series of a NORA3 grid point::
+Plot time series of a NORA3 grid point (and write data to .csv if write_csv=True)::
 
    from met_waves import plot_timeseries
    plot_timeseries(start_time='2007-11-08T12', end_time='2007-11-10T23', lon=3.20, lat=56.53, product='NORA3', variable='hs', write_csv=True)
