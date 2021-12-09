@@ -28,6 +28,8 @@ Plot time series of a NORA3 grid point (and write data to .csv if write_csv=True
                    variable='hs', write_csv=True)
 .. code-block:: rst
 
+Since the program uses directly thredds.met.no to access the data, it can take some time to plot/extract very long time series.
+
 .. image:: hs_NORA3_ts.png
   :width: 400
 
