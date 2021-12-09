@@ -39,10 +39,10 @@ Plot 2D spectra of a NORA3 grid point::
 .. image:: spec_nora3.png
   :width: 400
 
-Plot TOPAZ data::
+Plot TOPAZ data (use method='mean' to average over time or method='timestep' to get each timestep)::
 
-   from met_waves import plot_topaz
-   plot_topaz(date='1999-02-02', variable='fice')
+   from met_waves import plot_topaz 
+   plot_topaz(date='1999-02-02', variable='fice',method = 'mean',save_data =True)
 
 .. code-block:: rst
 
