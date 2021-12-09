@@ -148,8 +148,8 @@ def plot_panarctic_map(start_time, end_time, product, variable, method):
                                   var=var.loc[date_list[i]],lon=lon, lat=lat,
                                   min_value=min_value,max_value=max_value,
                                   method=method, ax=ax)
-            plt.title(product+','+str(var.time.values).split(':')[0]+'UTC')
-            plt.savefig(variable+str(var.time.values).split(':')[0]+'.png', bbox_inches='tight')
+            plt.title(product+','+str(date_list[i])+'UTC')
+            plt.savefig(variable+str(date_list[i])+'.png', bbox_inches='tight')
             plt.close()
     elif method == 'mean':
         ax = plot_NorthPolarStereo(product=product,
