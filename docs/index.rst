@@ -13,6 +13,7 @@ Plot panarctic map using NORA3 data (use method='mean' to average over time or m
    from met_waves import plot_panarctic_map
    plot_panarctic_map(start_time='2020-11-11T14', end_time='2020-11-11T15', 
                       product='NORA3', variable='hs', method='timestep')
+
 .. code-block:: rst
 
 .. image:: hs_nora3.png
