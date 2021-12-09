@@ -51,6 +51,7 @@ Plot TOPAZ data (use method='mean' to average over time or method='timestep' to 
 
 .. toctree::
    :maxdepth: 2
-   :caption: Contents:
+   :glob:
+
 
 
