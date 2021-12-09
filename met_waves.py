@@ -70,7 +70,7 @@ def plot_NorthPolarStereo(product, var,lon, lat, min_value,max_value,method,ax=N
                                   show_colorbar=True,
                                   cmap='jet',
                                   dx=1, dy=1, cmin=min_value, cmax=max_value,
-                                  lat_lim=50)     
+                                  lat_lim=50)
     if ax is None:
         return fig, ax
     else:
@@ -144,16 +144,16 @@ def plot_panarctic_map(start_time, end_time, product, variable, method):
         for i in range(len(date_list)):
             print(date_list[i])
             fig, ax = plt.subplots()
-            ax = plot_NorthPolarStereo(product=product, 
-                                  var=var.loc[date_list[i]],lon=lon, lat=lat, 
+            ax = plot_NorthPolarStereo(product=product,
+                                  var=var.loc[date_list[i]],lon=lon, lat=lat,
                                   min_value=min_value,max_value=max_value,
                                   method=method, ax=ax)
             plt.title(product+','+str(var.time.values).split(':')[0]+'UTC')
             plt.savefig(variable+str(var.time.values).split(':')[0]+'.png', bbox_inches='tight')
             plt.close()
     elif method == 'mean':
-        ax = plot_NorthPolarStereo(product=product, 
-                                  var=var.mean('time'),lon=lon, lat=lat, 
+        ax = plot_NorthPolarStereo(product=product,
+                                  var=var.mean('time'),lon=lon, lat=lat,
                                   min_value=var.mean('time').min(),
                                   max_value=var.mean('time').max(),
                                   method=method)
@@ -161,11 +161,42 @@ def plot_panarctic_map(start_time, end_time, product, variable, method):
         plt.savefig(variable+'_Mean_'+start_time+'-'+end_time+'.png', bbox_inches='tight')
         plt.close()
 
+def save_nc_statistics(start_time, end_time, product, variable, method, path):
+    """
+    Plots in a panarctic map a given variable
+    start_time = start date for plotting e.g., '2005-01-07T18'
+    end_time   = end date for plotting e.g., '2005-01-09T18'
+    Product: 'nora3' or 'wam4'
+    variable: e.g., 'hs', 'tp', 'ff' for wind
+    method: 'mean'
+    Overview of the NORAE3 wave variables is given in:
+    https://thredds.met.no/thredds/dodsC/windsurfer/mywavewam3km_agg/wam3kmhindcastaggregated.ncml.html
+    """
+    url = url_agg(product=product)
+    date_list = pd.date_range(start=start_time, end=end_time, freq='H')
+    #var = xr.open_dataset(url)[variable].sel(time=slice(start_time, end_time))
+    for i in range(0,date_list.shape[0],24):
+        print(date_list[i],'--',date_list[i+23])
+        if method == 'mean':
+            var0 = xr.open_dataset(url)[variable].sel(time=slice(date_list[i], date_list[i+23])).mean("time")
+            # lon = xr.open_dataset(url).longitude
+            # lat = xr.open_dataset(url).latitude
+            if i==0:
+                var = var0
+            else:
+                var = xr.concat([var,var0],dim='time').mean('time',keep_attrs=True)
+
+    var.to_netcdf(path+'/'+method+'_'+str(start_time)+'_'+ str(end_time)+'.nc')
+
 def get_url(product, day):
-    if product == 'NORA3':
+    if product == 'SPEC_NORA3':
         url = 'https://thredds.met.no/thredds/dodsC/windsurfer/mywavewam3km_spectra/' + \
             day.strftime('%Y') + '/'+day.strftime('%m') + \
             '/SPC'+day.strftime('%Y%m%d')+'00.nc'
+    elif product == 'NORA3':
+        url = 'https://thredds.met.no/thredds/dodsC/windsurfer/mywavewam3km_files/' + \
+            day.strftime('%Y') + '/'+day.strftime('%m') +  '/' + \
+            day.strftime('%Y%m%d')+'_MyWam3km_hindcast.nc'
     return url
 
 
@@ -204,9 +235,9 @@ def plot_2D_spectra(start_time, end_time, lon, lat, product):
         ax.set_zticks([])
         plot = ax.plot_surface(x, y, z, cmap='viridis', edgecolor='white',
                                vmin=SPEC.min(), vmax=SPEC.max(), alpha=0.8)
-        ceb = ax.contourf(x, y, z, zdir='x', vmin=SPEC.min(),
+        ax.contourf(x, y, z, zdir='x', vmin=SPEC.min(),
                           vmax=SPEC.max(), cmap='viridis', offset=0)
-        ceb = ax.contourf(x, y, z, zdir='y', vmin=SPEC.min(),
+        ax.contourf(x, y, z, zdir='y', vmin=SPEC.min(),
                           vmax=SPEC.max(), cmap='viridis', offset=0.55)
         ax.set_zlim(SPEC.min(), SPEC.max())
         cbar = fig.colorbar(plot, ax=ax, shrink=0.6)
@@ -224,7 +255,10 @@ def plot_2D_spectra(start_time, end_time, lon, lat, product):
         plt.close()
 
 
-def plot_topaz(start_time, end_time, variable, method):
+def plot_topaz(start_time, end_time, variable, method,save_data):
+    """
+    info about the hindcast: https://thredds.met.no/thredds/myocean/ARC-MFC/arc-topaz-ran-arc.html
+    """
     url = 'https://thredds.met.no/thredds/dodsC/topaz/dataset-ran-arc-day-myoceanv2-be'
     date_list = pd.date_range(start=start_time, end=end_time, freq='D')
     product = 'Arctic Ocean Physics Reanalysis'
@@ -235,30 +269,32 @@ def plot_topaz(start_time, end_time, variable, method):
         var = var.assign_attrs(units='m s-1')
     else:
         var = xr.open_dataset(url)[variable].sel(time=slice(start_time, end_time))
-        
+
     if method == 'timestep':
         min_value = var.min()
         max_value = var.max()
         print(max_value)
         for i in range(len(date_list)):
             print(date_list[i])
-            plot_NorthPolarStereo(product=product, 
+            plot_NorthPolarStereo(product=product,
                                   var=var.loc[date_list[i]],lon=var.longitude,
-                                  lat=var.latitude, 
+                                  lat=var.latitude,
                                   min_value=min_value,max_value=max_value,
                                   method=method)
             plt.title(product+'\n '+str(date_list[i]))
             plt.savefig(variable + str(date_list[i]) +'.png', bbox_inches='tight')
             plt.close
+        if save_data == True:
+            var.to_netcdf(variable+'_'+start_time+'-'+end_time+'.nc')
     elif method == 'mean':
-        plot_NorthPolarStereo(product=product, 
+        plot_NorthPolarStereo(product=product,
                                   var=var.mean('time'),lon=var.longitude,
-                                  lat=var.latitude, 
+                                  lat=var.latitude,
                                   min_value=var.mean('time').min(),
                                   max_value=var.mean('time').max(),
                                   method=method)
         plt.title(product+'\n Mean:'+start_time+'--'+end_time)
         plt.savefig(variable+'_Mean_'+start_time+'-'+end_time+'.png', bbox_inches='tight')
         plt.close()
-        
-
+        if save_data == True:
+            var.mean('time').to_netcdf(variable+'_Mean_'+start_time+'-'+end_time+'.nc')
