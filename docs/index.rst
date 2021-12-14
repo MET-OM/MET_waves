@@ -29,6 +29,17 @@ Plot time series of a NORA3 grid point (and write data to .csv if write_csv=True
 .. code-block:: rst
 
 Since the program uses directly thredds.met.no to access the data, it can take some time to plot/extract very long time series.
+For long time series, please use::
+
+   from met_waves import extract_ts_point
+   extract_ts_point(start_date ='2019-01-01', 
+                    end_date= '2019-01-31',
+                    variable=['hs','tp','hs_swell','tp_swell'],
+                    lon = 5, lat = 60,
+                    product='NORA3')
+.. code-block:: rst
+
+
 
 .. image:: hs_NORA3_ts.png
   :width: 400
