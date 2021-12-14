@@ -13,6 +13,8 @@ import ecco_v4_py as ecco
 import pandas as pd
 import numpy as np
 import time
+import os
+from nco import Nco
 
 
 def estimate_WEF(hs, tp):
@@ -298,3 +300,58 @@ def plot_topaz(start_time, end_time, variable, method,save_data):
         plt.close()
         if save_data == True:
             var.mean('time').to_netcdf(variable+'_Mean_'+start_time+'-'+end_time+'.nc')
+            
+            
+            
+            
+def extract_point_nora3(start_date,end_date,variable, lon, lat):
+    """
+    Extract times series of  the nearest gird point (lon,lat) of 
+    nora3 and save it as netcdf.
+    """
+    nco = Nco()
+    date_list = pd.date_range(start=start_date , end=end_date, freq='D')
+    outfile = variable+'_'+date_list.strftime('%Y%m%d')[0]+'_'+date_list.strftime('%Y%m%d')[-1]+'.nc'
+    
+    if os.path.exists(outfile):
+        os.remove(outfile)
+        print(outfile, 'already exists, so it will be deleted and create a new....')
+    
+    else:
+        print("....")
+    
+    
+    tempfile = [None] *len(date_list)
+    # Create directory
+    dirName = 'temp'
+    try:
+        # Create target Directory
+        os.mkdir(dirName)
+        print("Directory " , dirName ,  " Created ") 
+    except FileExistsError:
+        print("Directory " , dirName ,  " already exists")
+    
+    # extract point and create temp files
+    for i in range(len(date_list)):
+        tempfile[i] = 'temp/temp'+date_list.strftime('%Y%m%d')[i]+'.nc'
+        infile = 'https://thredds.met.no/thredds/dodsC/windsurfer/mywavewam3km_files/'+date_list.strftime('%Y')[i]+'/'+date_list.strftime('%m')[i]+'/'+date_list.strftime('%Y%m%d')[i]+'_MyWam3km_hindcast.nc'
+        print(infile)
+        if i==0:
+            ds = xr.open_dataset(infile)
+            print('Find nearest point to lon.='+str(lon)+','+'lat.='+str(lat))
+            rlon, rlat = find_nearest(ds.longitude, ds.latitude, lat, lon)
+            lon_near = ds.longitude.sel(rlat=rlat, rlon=rlon).values[0][0]
+            lat_near = ds.latitude.sel(rlat=rlat, rlon=rlon).values[0][0]
+            print('Found nearest: lon.='+str(lon_near)+',lat=' + str(lat_near))        
+            
+        opt = ['-O -v '+variable+' -d rlon,'+str(rlon.values[0])+' -d rlat,'+str(rlat.values[0])]
+        nco.ncks(input=infile , output=tempfile[i], options=opt)
+           
+    #merge temp files
+    nco.ncrcat(input=tempfile, output=outfile)
+    
+    #remove temp files
+    for i in range(len(date_list)):
+        os.remove(tempfile[i])
+        
+    return
