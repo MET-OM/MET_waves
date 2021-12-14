@@ -163,32 +163,6 @@ def plot_panarctic_map(start_time, end_time, product, variable, method):
         plt.savefig(variable+'_Mean_'+start_time+'-'+end_time+'.png', bbox_inches='tight')
         plt.close()
 
-def save_nc_statistics(start_time, end_time, product, variable, method, path):
-    """
-    Plots in a panarctic map a given variable
-    start_time = start date for plotting e.g., '2005-01-07T18'
-    end_time   = end date for plotting e.g., '2005-01-09T18'
-    Product: 'nora3' or 'wam4'
-    variable: e.g., 'hs', 'tp', 'ff' for wind
-    method: 'mean'
-    Overview of the NORAE3 wave variables is given in:
-    https://thredds.met.no/thredds/dodsC/windsurfer/mywavewam3km_agg/wam3kmhindcastaggregated.ncml.html
-    """
-    url = url_agg(product=product)
-    date_list = pd.date_range(start=start_time, end=end_time, freq='H')
-    #var = xr.open_dataset(url)[variable].sel(time=slice(start_time, end_time))
-    for i in range(0,date_list.shape[0],24):
-        print(date_list[i],'--',date_list[i+23])
-        if method == 'mean':
-            var0 = xr.open_dataset(url)[variable].sel(time=slice(date_list[i], date_list[i+23])).mean("time")
-            # lon = xr.open_dataset(url).longitude
-            # lat = xr.open_dataset(url).latitude
-            if i==0:
-                var = var0
-            else:
-                var = xr.concat([var,var0],dim='time').mean('time',keep_attrs=True)
-
-    var.to_netcdf(path+'/'+method+'_'+str(start_time)+'_'+ str(end_time)+'.nc')
 
 def get_url(product, day):
     if product == 'SPEC_NORA3':
@@ -304,14 +278,14 @@ def plot_topaz(start_time, end_time, variable, method,save_data):
             
             
             
-def extract_point_nora3(start_date,end_date,variable, lon, lat):
+def extract_ts_point(start_date,end_date,variable, lon, lat, product ='NORA3'):
     """
-    Extract times series of  the nearest gird point (lon,lat) of 
-    nora3 and save it as netcdf.
+    Extract times series of  the nearest gird point (lon,lat) from 
+    nora3 wave hindcast and save it as netcdf.
     """
     nco = Nco()
     date_list = pd.date_range(start=start_date , end=end_date, freq='D')
-    outfile = variable+'_'+date_list.strftime('%Y%m%d')[0]+'_'+date_list.strftime('%Y%m%d')[-1]+'.nc'
+    outfile = 'lon'+str(lon)+'_'+'lat'+str(lat)+'_'+date_list.strftime('%Y%m%d')[0]+'_'+date_list.strftime('%Y%m%d')[-1]+'.nc'
     
     if os.path.exists(outfile):
         os.remove(outfile)
@@ -334,17 +308,18 @@ def extract_point_nora3(start_date,end_date,variable, lon, lat):
     # extract point and create temp files
     for i in range(len(date_list)):
         tempfile[i] = 'temp/temp'+date_list.strftime('%Y%m%d')[i]+'.nc'
-        infile = 'https://thredds.met.no/thredds/dodsC/windsurfer/mywavewam3km_files/'+date_list.strftime('%Y')[i]+'/'+date_list.strftime('%m')[i]+'/'+date_list.strftime('%Y%m%d')[i]+'_MyWam3km_hindcast.nc'
-        print(infile)
-        if i==0:
-            ds = xr.open_dataset(infile)
-            print('Find nearest point to lon.='+str(lon)+','+'lat.='+str(lat))
-            rlon, rlat = find_nearest(ds.longitude, ds.latitude, lat, lon)
-            lon_near = ds.longitude.sel(rlat=rlat, rlon=rlon).values[0][0]
-            lat_near = ds.latitude.sel(rlat=rlat, rlon=rlon).values[0][0]
-            print('Found nearest: lon.='+str(lon_near)+',lat=' + str(lat_near))        
+        if product == 'NORA3':
+             infile = 'https://thredds.met.no/thredds/dodsC/windsurfer/mywavewam3km_files/'+date_list.strftime('%Y')[i]+'/'+date_list.strftime('%m')[i]+'/'+date_list.strftime('%Y%m%d')[i]+'_MyWam3km_hindcast.nc'
+             print(infile)
+             if i==0:
+                 ds = xr.open_dataset(infile)
+                 print('Find nearest point to lon.='+str(lon)+','+'lat.='+str(lat))
+                 rlon, rlat = find_nearest(ds.longitude, ds.latitude, lat, lon)
+                 lon_near = ds.longitude.sel(rlat=rlat, rlon=rlon).values[0][0]
+                 lat_near = ds.latitude.sel(rlat=rlat, rlon=rlon).values[0][0]
+                 print('Found nearest: lon.='+str(lon_near)+',lat.=' + str(lat_near))        
             
-        opt = ['-O -v '+variable+' -d rlon,'+str(rlon.values[0])+' -d rlat,'+str(rlat.values[0])]
+        opt = ['-O -v '+",".join(variable)+' -d rlon,'+str(rlon.values[0])+' -d rlat,'+str(rlat.values[0])]
         nco.ncks(input=infile , output=tempfile[i], options=opt)
            
     #merge temp files
