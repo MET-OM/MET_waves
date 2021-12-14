@@ -28,8 +28,11 @@ Plot time series of a NORA3 grid point (and write data to .csv if write_csv=True
                    variable='hs', write_csv=True)
 .. code-block:: rst
 
+.. image:: hs_NORA3_ts.png
+  :width: 400
+
 Since the program uses directly thredds.met.no to access the data, it can take some time to plot/extract very long time series.
-For long time series, please use::
+For long time series, please use the following function that extracts times series of the nearest gird point (lon,lat) from a wave product and saves it in a netcdf format::
 
    from met_waves import extract_ts_point
    extract_ts_point(start_date ='2019-01-01', 
@@ -39,10 +42,6 @@ For long time series, please use::
                     product='NORA3')
 .. code-block:: rst
 
-
-
-.. image:: hs_NORA3_ts.png
-  :width: 400
 
 Plot 2D spectra of a NORA3 grid point::
 
