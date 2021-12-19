@@ -79,7 +79,7 @@ def plot_NorthPolarStereo(product, var,lon, lat, min_value,max_value,method,ax=N
         return ax
 
 
-def plot_timeseries(start_time, end_time, lon, lat, product, variable, write_csv, **plotargs):
+def plot_timeseries(start_time, end_time, lon, lat, product, variable, write_csv, ts_obs, **plotargs):
     start = time.time()
     date_list = pd.date_range(start=start_time, end=end_time, freq='H')
     df = pd.DataFrame({'time': date_list, variable: np.zeros(len(date_list))})
@@ -106,8 +106,13 @@ def plot_timeseries(start_time, end_time, lon, lat, product, variable, write_csv
     print('Plot time series...')
     fig, ax = plt.subplots(**plotargs)
     df.plot(ax=ax)
+    if ts_obs is not None:
+        ts_obs.plot(ax=ax)
+        ax.legend([product,'obs.'])
+    else:
+        ax.legend([product])
     ax.grid()
-    ax.set_ylabel('['+units+']', fontsize=14)
+    ax.set_ylabel(variable+' ['+units+']', fontsize=14)
     ax.set_title(product+',lon.='
                  + str(lon_near)+',lat.='+str(lat_near), fontsize=16)
     plt.savefig(variable+'_'+product+'_lon'
