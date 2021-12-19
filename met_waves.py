@@ -330,3 +330,23 @@ def extract_ts_point(start_date,end_date,variable, lon, lat, product ='NORA3'):
         os.remove(tempfile[i])
         
     return
+def plot_swan_spec2D(start_time, end_time,infile):
+    from wavespectra import read_ncswan
+    ds = read_ncswan(infile).sel(time=slice(start_time, end_time))
+    hs_spec = ds.isel(site=0).efth.spec.hs()
+    # tp_spec = ds.isel(site=0).efth.spec.tp()
+    # dp_spec = ds.isel(site=0).efth.spec.dp()
+    vmax=ds.efth.max()
+    vmin=ds.efth.min()
+    for i in range(ds.time.shape[0]):
+        ax = plt.subplot(111, polar=True)
+        ds.isel(site=0,time=i).efth.spec.split(fmin=0.04).spec.plot.contourf(cmap="ocean_r",vmin=vmin, vmax=vmax,levels=25, as_period=True,as_log10=False)
+        ax.set_theta_zero_location("N")
+        ax.set_theta_direction(-1)
+        ax.set_xticklabels(['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'])
+        ax.set_ylabel('')
+        ax.set_xlabel('')
+        plt.title('$'+'lon.:'+str(ds.lon.values[0].round(2))+','+'lat.:'+str(ds.lat.values[0].round(2))+','+str(ds.time.values[i]).split(':')[0]+', H_{m0}:'+str(hs_spec.values[i].round(1))+
+                  'm'+'$')
+        plt.savefig(str(ds.time.values[i]).split(':')[0]+'.png',dpi=300)
+        plt.close()
