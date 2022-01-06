@@ -17,6 +17,7 @@ import os
 from nco import Nco
 
 
+
 def estimate_WEF(hs, tp):
     WEF = 0.5*(hs**2)*(0.85*tp)
     return WEF
@@ -315,6 +316,7 @@ def extract_ts_point(start_date,end_date,variable, lon, lat, product ='NORA3'):
         tempfile[i] = 'temp/temp'+date_list.strftime('%Y%m%d')[i]+'.nc'
         if product == 'NORA3':
              infile = 'https://thredds.met.no/thredds/dodsC/windsurfer/mywavewam3km_files/'+date_list.strftime('%Y')[i]+'/'+date_list.strftime('%m')[i]+'/'+date_list.strftime('%Y%m%d')[i]+'_MyWam3km_hindcast.nc'
+             #infile_http = 'https://thredds.met.no/thredds/fileServer/windsurfer/mywavewam3km_files/'+date_list.strftime('%Y')[i]+'/'+date_list.strftime('%m')[i]+'/'+date_list.strftime('%Y%m%d')[i]+'_MyWam3km_hindcast.nc'
              print(infile)
              if i==0:
                  ds = xr.open_dataset(infile)
@@ -325,7 +327,14 @@ def extract_ts_point(start_date,end_date,variable, lon, lat, product ='NORA3'):
                  print('Found nearest: lon.='+str(lon_near)+',lat.=' + str(lat_near))        
             
         opt = ['-O -v '+",".join(variable)+' -d rlon,'+str(rlon.values[0])+' -d rlat,'+str(rlat.values[0])]
-        nco.ncks(input=infile , output=tempfile[i], options=opt)
+        for x in range(0, 6):  # try 6 times
+            try:
+                nco.ncks(input=infile , output=tempfile[i], options=opt)
+            except:
+                print('......Retry'+str(x)+'.....')
+                time.sleep(10)  # wait for 10 seconds before re-trying 
+            else:
+                break
            
     #merge temp files
     nco.ncrcat(input=tempfile, output=outfile)
@@ -335,6 +344,8 @@ def extract_ts_point(start_date,end_date,variable, lon, lat, product ='NORA3'):
         os.remove(tempfile[i])
         
     return
+    
+    
 def plot_swan_spec2D(start_time, end_time,infile):
     from wavespectra import read_ncswan
     ds = read_ncswan(infile).sel(time=slice(start_time, end_time))
