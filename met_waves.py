@@ -280,37 +280,37 @@ def plot_topaz(start_time, end_time, variable, method,save_data):
         plt.close()
         if save_data == True:
             var.mean('time').to_netcdf(variable+'_Mean_'+start_time+'-'+end_time+'.nc')
-            
-            
-            
-            
+
+
+
+
 def extract_ts_point(start_date,end_date,variable, lon, lat, product ='NORA3'):
     """
-    Extract times series of  the nearest gird point (lon,lat) from 
+    Extract times series of  the nearest gird point (lon,lat) from
     nora3 wave hindcast and save it as netcdf.
     """
     nco = Nco()
     date_list = pd.date_range(start=start_date , end=end_date, freq='D')
     outfile = 'lon'+str(lon)+'_'+'lat'+str(lat)+'_'+date_list.strftime('%Y%m%d')[0]+'_'+date_list.strftime('%Y%m%d')[-1]+'.nc'
-    
+
     if os.path.exists(outfile):
         os.remove(outfile)
         print(outfile, 'already exists, so it will be deleted and create a new....')
-    
+
     else:
         print("....")
-    
-    
+
+
     tempfile = [None] *len(date_list)
     # Create directory
     dirName = 'temp'
     try:
         # Create target Directory
         os.mkdir(dirName)
-        print("Directory " , dirName ,  " Created ") 
+        print("Directory " , dirName ,  " Created ")
     except FileExistsError:
         print("Directory " , dirName ,  " already exists")
-    
+
     # extract point and create temp files
     for i in range(len(date_list)):
         tempfile[i] = 'temp/temp'+date_list.strftime('%Y%m%d')[i]+'.nc'
@@ -324,28 +324,152 @@ def extract_ts_point(start_date,end_date,variable, lon, lat, product ='NORA3'):
                  rlon, rlat = find_nearest(ds.longitude, ds.latitude, lat, lon)
                  lon_near = ds.longitude.sel(rlat=rlat, rlon=rlon).values[0][0]
                  lat_near = ds.latitude.sel(rlat=rlat, rlon=rlon).values[0][0]
-                 print('Found nearest: lon.='+str(lon_near)+',lat.=' + str(lat_near))        
-            
+                 print('Found nearest: lon.='+str(lon_near)+',lat.=' + str(lat_near))
+
         opt = ['-O -v '+",".join(variable)+' -d rlon,'+str(rlon.values[0])+' -d rlat,'+str(rlat.values[0])]
         for x in range(0, 6):  # try 6 times
             try:
                 nco.ncks(input=infile , output=tempfile[i], options=opt)
             except:
                 print('......Retry'+str(x)+'.....')
-                time.sleep(10)  # wait for 10 seconds before re-trying 
+                time.sleep(10)  # wait for 10 seconds before re-trying
             else:
                 break
-           
+
     #merge temp files
     nco.ncrcat(input=tempfile, output=outfile)
-    
+
     #remove temp files
     for i in range(len(date_list)):
         os.remove(tempfile[i])
-        
+
     return
-    
-    
+
+def extract_variable(start_date,end_date,variable,mean_method, product ='NORA3'):
+    """
+    Extract a variable for the whole NORA3 domain and save it as netcdf.
+    """
+    nco = Nco()
+    date_list = pd.date_range(start=start_date , end=end_date, freq='D')
+    outfile = "-".join(variable)+'_'+date_list.strftime('%Y%m%d')[0]+'_'+date_list.strftime('%Y%m%d')[-1]+'.nc'
+
+    if os.path.exists(outfile):
+        os.remove(outfile)
+        print(outfile, 'already exists, so it will be deleted and create a new....')
+
+    else:
+        print("....")
+
+
+    tempfile = [None] *len(date_list)
+    # Create directory
+    dirName = 'temp'
+    try:
+        # Create target Directory
+        os.mkdir(dirName)
+        print("Directory " , dirName ,  " Created ")
+    except FileExistsError:
+        print("Directory " , dirName ,  " already exists")
+
+    # extract point and create temp files
+    for i in range(len(date_list)):
+        tempfile[i] = 'temp/temp'+date_list.strftime('%Y%m%d')[i]+'.nc'
+        if product == 'NORA3':
+             infile = 'https://thredds.met.no/thredds/dodsC/windsurfer/mywavewam3km_files/'+date_list.strftime('%Y')[i]+'/'+date_list.strftime('%m')[i]+'/'+date_list.strftime('%Y%m%d')[i]+'_MyWam3km_hindcast.nc'
+             print(infile)
+
+
+        for x in range(0, 6):  # try 6 times
+            try:
+                if mean_method == None:
+                    opt = ['-O -v '+",".join(variable)]
+                    nco.ncks(input=infile , output=tempfile[i], options=opt)
+                elif mean_method == 'daily':
+                    opt = ['-O -v '+",".join(variable)+' -d time,,,24,24']
+                    nco.ncra(input=infile , output=tempfile[i], options=opt)
+            except:
+                print('......Retry'+str(x)+'.....')
+                time.sleep(10)  # wait for 10 seconds before re-trying
+            else:
+                break
+
+    #merge temp files
+    nco.ncrcat(input=tempfile, output=outfile)
+
+    #remove temp files
+    for i in range(len(date_list)):
+        os.remove(tempfile[i])
+
+    return
+
+def convert_HOS_3Ddat_to_netcdf(input_file,output_file):
+    """
+    Function to convert the HOS-ocean file e.g., 3d.dat
+    to a netcdf file
+    Parameters:
+    input_file = HOS-ocean output of eta, e.g., 3d.dat
+    output_file = filename.nc
+    ----------
+    eta  : 3D free surface elevation [time,y, x]
+   Returns
+   -------
+    ds : xr.Dataset
+        eta: 3D surface elevation [time,y, x]
+    """
+    with open(input_file) as f:
+        lines = f.readlines()
+
+    # remove lines with # comments
+    lines = [x for x in lines if not x.startswith('#')]
+    lines = [s.replace("\n", "") for s in lines]
+
+    I = int(lines[2].split(',')[1].split('=')[1])
+    J = int(lines[2].split()[-1])
+
+    title = lines[0].split('"')[1]
+
+    #remove lines with titles
+    lines = [x for x in lines if not x.startswith('T')]
+    lines = [x for x in lines if not x.startswith('V')]
+    lines = [x for x in lines if not x.startswith('Z')]
+    lines = [s.split() for s in lines]
+
+    timestep = int(len(lines)/(I*J))
+
+    x = np.zeros(I*J)
+    y = np.zeros(I*J)
+    eta = np.zeros(len(lines))
+
+    for i in range(len(lines)):
+        if i < I*J:
+            x[i] = float(lines[i][0])
+            y[i] = float(lines[i][1])
+            eta[i] = float(lines[i][2])
+        else:
+            eta[i] = float(lines[i][0])
+
+    eta_3d = np.zeros((timestep,J,I))
+    eta_3d[0,:,:] = eta[0:I*J].reshape((-J, I))
+
+    # fill x, y
+    x = x[0:I]
+    y = y[0::I]
+
+    # fill eta_3d
+    for t in range(timestep):
+        eta_3d[t,:,:] = eta[t*(I*J):(t+1)*(I*J)].reshape((-J, I))
+
+    # create xarray
+    ds = xr.Dataset({'eta': xr.DataArray(eta_3d,
+                            coords={'time': np.arange(timestep),'y': y, 'x': x},
+                            dims=["time", "y", "x"],
+                            attrs  = {'units': 'm','long_name':title})})
+    #save xarray ro netcdf
+    ds.to_netcdf(output_file)
+
+    return ds
+
+
 def plot_swan_spec2D(start_time, end_time,infile):
     from wavespectra import read_ncswan
     ds = read_ncswan(infile).sel(time=slice(start_time, end_time))
