@@ -14,6 +14,7 @@ import pandas as pd
 import numpy as np
 import time
 import os
+import scipy.io
 from nco import Nco
 
 
@@ -469,6 +470,42 @@ def convert_HOS_3Ddat_to_netcdf(input_file,output_file):
 
     return ds
 
+def convert_swash_mat_to_netcdf(input_file,output_file):
+    """
+    Function to convert the swash mat-file e.g.
+    to a netcdf file
+    Parameters:
+    input_file = file.mat
+    output_file = filename.nc
+    ----------
+    eta  : 3D free surface elevation [time,x, y]
+   Returns
+   -------
+    ds : xr.Dataset
+        eta: 3D surface elevation [time,x, y]
+    """
+    mat = scipy.io.loadmat(input_file)
+    x = mat[list(mat.keys())[5]].shape[0]
+    y = mat[list(mat.keys())[5]].shape[1]
+    t = len(list(mat.keys()))-4
+    eta = np.zeros((t,x,y))
+    depth = mat['Botlev'] #mat[list(mat.keys())[4]]
+    for i in range(5,len(list(mat.keys())),1):
+        eta[i-5,:,:] = mat[list(mat.keys())[i]]
+        
+    # create xarray
+    ds = xr.Dataset({'eta': xr.DataArray(eta,
+                            coords={'time': np.arange(t),'x': np.arange(x), 'y': np.arange(y)},
+                            dims=["time", "x", "y"],
+                            attrs  = {'units': 'm','long_name':'surface elevation'}),
+                     'depth': xr.DataArray(depth,
+                                             coords={'x': np.arange(x), 'y': np.arange(y)},
+                                             dims=["x", "y"],
+                                             attrs  = {'units': 'm','long_name':'depth'}),
+                                      })
+    #save xarray to netcdf
+    ds.to_netcdf(output_file)
+    return ds
 
 def plot_swan_spec2D(start_time, end_time,infile):
     from wavespectra import read_ncswan
