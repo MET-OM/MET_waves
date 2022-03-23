@@ -6,6 +6,15 @@
 Welcome to MET_waves's documentation!
 =====================================
 Tools for data analysis and visualization of MET Norway (https://www.met.no/) wave datasets (e.g., NORA3, WAM4).
+
+Create the environment with the required dependencies and install met_waves:
+
+.. code-block:: bash
+
+  $ conda config --add channels conda-forge
+  $ conda env create -f environment.yml
+  $ conda activate met_waves
+
 The package is under preparation. Some examples are given below:
 
 Plot panarctic map using NORA3 data (use method='mean' to average over time or method='timestep' to get each timestep)::
