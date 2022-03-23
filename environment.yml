@@ -1,0 +1,17 @@
+name: met_waves
+channels:
+  - conda-forge
+dependencies:
+  - python=>3.9
+  - matplotlib>=3.1
+  - numpy>=1.17
+  - cartopy>=0.18
+  - pandas
+  - xarray=>0.20.1
+  - ecco_v4_py
+  - pip
+  - nco
+  - time
+
+  
+  
