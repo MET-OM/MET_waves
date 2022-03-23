@@ -11,6 +11,7 @@ dependencies:
   - ecco_v4_py
   - pip
   - nco
+  - pynco
   - time
 
   
