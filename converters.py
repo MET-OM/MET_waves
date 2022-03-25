@@ -76,7 +76,7 @@ def convert_HOS_3Ddat_to_netcdf(input_file,output_file):
 
     return ds
 
-def convert_swash_mat_to_netcdf(input_file,output_file,lon=[0,20],lat=[0,20]):
+def convert_swash_mat_to_netcdf(input_file,output_file,lon=[0,20],lat=[0,20], dt=1):
     """
     Function to convert the swash mat-file (with only:'Botlev' & 'Wavelev')
     to a netcdf file
@@ -87,6 +87,7 @@ def convert_swash_mat_to_netcdf(input_file,output_file,lon=[0,20],lat=[0,20]):
     eta  : 3D free surface elevation [time,x, y]
     lon  : [lon_min, lon_max]
     lat  : [lat_min, lat_max]
+    dt  : timestep of simulation in seconds
    Returns
    -------
     ds : xr.Dataset
@@ -100,19 +101,22 @@ def convert_swash_mat_to_netcdf(input_file,output_file,lon=[0,20],lat=[0,20]):
     depth = mat[list(mat.keys())[4]] # mat['Botlev']
     lon = np.linspace(lon[0],lon[1],num=y)
     lat = np.linspace(lat[0],lat[1],num=x)
+    time = np.linspace(0,t*dt,num=t)
     for i in range(5,len(list(mat.keys())),1):
         eta[i-5,:,:] = mat[list(mat.keys())[i]]
 
     # create xarray
     ds = xr.Dataset({'eta': xr.DataArray(eta,
-                            coords={'time': np.arange(t),'lat': lat, 'lon': lon},
+                            coords={'time': time,'lat': lat, 'lon': lon},
                             dims=["time", "lat", "lon"],
                             attrs  = {'units': 'm','long_name':'surface elevation'}),
                      'depth': xr.DataArray(depth,
                                              coords={'lat': lat, 'lon': lon},
                                              dims=["lat", "lon"],
-                                             attrs  = {'units': 'm','long_name':'depth'}),
-                                      })
+                                             attrs  = {'units': 'm','long_name':'depth'})})
+
+
+    ds.time.attrs['units'] = 's'
     #save xarray to netcdf
     ds.to_netcdf(output_file)
     return ds
