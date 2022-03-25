@@ -115,5 +115,4 @@ def convert_swash_mat_to_netcdf(input_file,output_file,lon=[0,20],lat=[0,20]):
                                       })
     #save xarray to netcdf
     ds.to_netcdf(output_file)
-    print(mat['Botlev'].shape)
     return ds
