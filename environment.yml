@@ -13,7 +13,4 @@ dependencies:
   - nco
   - pynco
   - time
-  - scipy.io
-
-  
-  
+  - scipy
