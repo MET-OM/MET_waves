@@ -61,10 +61,11 @@ def url_agg(product):
 
 def plot_grid_spec_points(url,s=0.5,color='red'):
     """
-    Plot all grid points where spectrum is available in NORA3 or WAM4 datasets (https://thredds.met.no)
-    url : link or nc-file for NORA3 or WAM4 dataset
+    Plot all grid points where spectrum is available in NORA3/WAM4/WW3 datasets (https://thredds.met.no)
+    url : link or nc-file for NORA3/WAM4/WW3 dataset
     e.g., url for NORA3: https://thredds.met.no/thredds/dodsC/windsurfer/mywavewam3km_spectra/2020/12/SPC2020123100.nc
-          url for WAM: https://thredds.met.no/thredds/dodsC/fou-hi/mywavewam4archive/2022/05/24/MyWave_wam4_SPC_20220524T00Z.nc
+          url for WAM4:  https://thredds.met.no/thredds/dodsC/fou-hi/mywavewam4archive/2022/05/24/MyWave_wam4_SPC_20220524T00Z.nc
+          url for WW3:   https://thredds.met.no/thredds/dodsC/ww3_4km_latest_files/ww3_POI_SPC_20220524T12Z.nc
     s : marker size
     color: marker color
     """
