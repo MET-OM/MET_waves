@@ -17,6 +17,21 @@ Create the environment with the required dependencies and install met_waves:
 
 The package is under preparation. Some examples are given below:
 
+ Plot all grid points that spectrum is available in NORA3 or WAM4 datasets (https://thredds.met.no)::
+ 
+   # example for NORA3:
+   from met_waves import plot_grid_spec_points
+   url = 'https://thredds.met.no/thredds/dodsC/windsurfer/mywavewam3km_spectra/2020/12/SPC2020123100.nc'
+   plot_grid_spec_points(url,s=0.01,color='red')
+
+.. code-block:: rst
+
+.. image:: spec_points.png
+  :width: 400
+  
+.. image:: zoom_spec_points.png
+  :width: 400
+
 Plot panarctic map using NORA3 data (use method='mean' to average over time or method='timestep' to get each timestep)::
 
    from met_waves import plot_panarctic_map
