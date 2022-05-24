@@ -67,7 +67,7 @@ For long time series, please use the following function that extracts times seri
 .. code-block:: rst
 
 
-Plot 2D spectra of a NORA3 grid point::
+Plot 2D spectra of a NORA3(product='SPEC_NORA3')/WW3(product='SPEC_WW3') grid point::
 
    from met_waves import plot_2D_spectra
    plot_2D_spectra(start_time='2007-11-08T23', end_time='2007-11-10T23',
