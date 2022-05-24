@@ -19,7 +19,7 @@ from nco import Nco
 
 
 def estimate_WEF(hs, tp):
-    WEF = 0.5*(hs**2)*(0.85*tp)
+    WEF = 0.5*(hs**2)*(0.85*tp) # KW/m
     return WEF
 
 
@@ -60,7 +60,7 @@ def url_agg(product):
     return url
 
 
-def plot_NorthPolarStereo(product, var,lon, lat, min_value,max_value,method,ax=None):
+def plot_NorthPolarStereo(product, var,lon, lat, min_value,max_value,cmap,ax=None):
     if ax is None:
         fig, ax = plt.subplots()
 
@@ -71,7 +71,7 @@ def plot_NorthPolarStereo(product, var,lon, lat, min_value,max_value,method,ax=N
                                   projection_type='stereo',
                                   plot_type='contourf',
                                   show_colorbar=True,
-                                  cmap='jet',
+                                  cmap=cmap,
                                   dx=1, dy=1, cmin=min_value, cmax=max_value,
                                   lat_lim=50)
     if ax is None:
@@ -126,7 +126,7 @@ def plot_timeseries(start_time, end_time, lon, lat, product, variable, write_csv
     return
 
 
-def plot_panarctic_map(start_time, end_time, product, variable, method):
+def plot_panarctic_map(start_time, end_time, product, variable, method, cmap='jet'):
     """
     Plots in a panarctic map a given variable
     start_time = start date for plotting e.g., '2005-01-07T18'
@@ -140,22 +140,25 @@ def plot_panarctic_map(start_time, end_time, product, variable, method):
     url = url_agg(product=product)
     date_list = pd.date_range(start=start_time, end=end_time, freq='H')
     #var = xr.open_dataset(url)[variable].sel(time=slice(start_time, end_time))
-    var = xr.open_dataset(url)[variable]
-    var = var.sel(time=~var.get_index("time").duplicated())
-    var = var.sel(time=slice(start_time, end_time))
+    if variable == 'WEF':
+       var = estimate_WEF(xr.open_dataset(url)['hs'].sel(time=slice(start_time, end_time)), xr.open_dataset(url)['tp'].sel(time=slice(start_time, end_time)))
+    else:
+    	var = xr.open_dataset(url)[variable]
+    	var = var.sel(time=~var.get_index("time").duplicated())
+    	var = var.sel(time=slice(start_time, end_time))
     lon = xr.open_dataset(url).longitude
     lat = xr.open_dataset(url).latitude
     if method == 'timestep':
         min_value = var.min()
         max_value = var.max()
-        print(max_value)
+        #print(max_value)
         for i in range(len(date_list)):
             print(date_list[i])
             fig, ax = plt.subplots()
             ax = plot_NorthPolarStereo(product=product,
                                   var=var.loc[date_list[i]],lon=lon, lat=lat,
                                   min_value=min_value,max_value=max_value,
-                                  method=method, ax=ax)
+                                  cmap=cmap, ax=ax)
             plt.title(product+','+str(date_list[i])+'UTC')
             plt.savefig(variable+str(date_list[i])+'.png', bbox_inches='tight')
             plt.close()
@@ -164,7 +167,7 @@ def plot_panarctic_map(start_time, end_time, product, variable, method):
                                   var=var.mean('time'),lon=lon, lat=lat,
                                   min_value=var.mean('time').min(),
                                   max_value=var.mean('time').max(),
-                                  method=method)
+                                  cmap=cmap)
         plt.title(product+',Mean:'+start_time+'--'+end_time)
         plt.savefig(variable+'_Mean_'+start_time+'-'+end_time+'.png', bbox_inches='tight')
         plt.close()
