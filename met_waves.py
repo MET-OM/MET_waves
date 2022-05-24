@@ -75,7 +75,7 @@ def plot_grid_spec_points(url,s=0.5,color='red'):
     #ax.add_feature(cfeature.LAND,color='darkkhaki')
     #ax.add_feature(cfeature.LAKES)
     #ax.coastlines(resolution='50m', color='darkkhaki', linewidth=0.5)
-    ax.scatter(data.longitude,data.latitude,s=1, marker='.', color='red', transform=ccrs.PlateCarree())
+    ax.scatter(data.longitude,data.latitude,s=s, marker='.', color=color, transform=ccrs.PlateCarree())
     plt.title('Grid Points (2D Spectrum)',fontsize=18)
     plt.show()
     plt.savefig('spec_points.png',dpi=300)
