@@ -153,7 +153,7 @@ def plot_panarctic_map(start_time, end_time, product, variable, method, cmap='je
     Plots in a panarctic map a given variable
     start_time = start date for plotting e.g., '2005-01-07T18'
     end_time   = end date for plotting e.g., '2005-01-09T18'
-    Product: 'nora3' or 'wam4'
+    Product: 'nora3' / 'wam4'  
     variable: e.g., 'hs', 'tp', 'ff' for wind
     method: 'timestep' for plotting all timesteps for given period or 'mean'
     Overview of the NORAE3 wave variables is given in:
@@ -191,7 +191,7 @@ def plot_panarctic_map(start_time, end_time, product, variable, method, cmap='je
                                   max_value=var.mean('time').max(),
                                   cmap=cmap)
         plt.title(product+',Mean:'+start_time+'--'+end_time)
-        plt.savefig(variable+'_Mean_'+start_time+'-'+end_time+'.png', bbox_inches='tight')
+        plt.savefig(variable+'_Mean_'+start_time+'-'+end_time+'.png', bbox_inches='tight',dpi=300)
         plt.close()
 
 
@@ -200,6 +200,9 @@ def get_url(product, day):
         url = 'https://thredds.met.no/thredds/dodsC/windsurfer/mywavewam3km_spectra/' + \
             day.strftime('%Y') + '/'+day.strftime('%m') + \
             '/SPC'+day.strftime('%Y%m%d')+'00.nc'
+    elif product == 'SPEC_WW3':
+        url = 'https://thredds.met.no/thredds/dodsC/ww3_4km_latest_files/' + \
+            'ww3_POI_SPC_'+day.strftime('%Y%m%d')+'T00Z.nc' 
     elif product == 'NORA3':
         url = 'https://thredds.met.no/thredds/dodsC/windsurfer/mywavewam3km_files/' + \
             day.strftime('%Y') + '/'+day.strftime('%m') +  '/' + \
@@ -208,6 +211,14 @@ def get_url(product, day):
 
 
 def plot_2D_spectra(start_time, end_time, lon, lat, product):
+    """
+    Plots in a panarctic map a given variable
+    start_time : start date for plotting e.g., '2005-01-07T18'
+    end_time   : end date for plotting e.g., '2005-01-09T18'
+    lon : longtitude
+    lat   latitude
+    product: 'SPEC_NORA3' / 'SPEC_WW3'  
+    """
     data = []
     date_list = pd.date_range(start=start_time, end=end_time, freq='D')
     for k in range(len(date_list)):  # loop over days
@@ -227,7 +238,7 @@ def plot_2D_spectra(start_time, end_time, lon, lat, product):
         nrows, ncols = z.shape
         y = ds.freq.values
         x = ds.direction.values
-        ([x_peak], [y_peak]) = np.where(z == np.max(z))
+        ([y_peak], [x_peak]) = np.where(z == np.max(z))
         x, y = np.meshgrid(x, y)
         fig = plt.figure(figsize=(8, 6))
         ax = plt.subplot(111, projection='3d')
