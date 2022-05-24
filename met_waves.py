@@ -59,6 +59,28 @@ def url_agg(product):
         url = 'https://thredds.met.no/thredds/dodsC/sea/mywavewam4/mywavewam4_c47_be'
     return url
 
+def plot_grid_spec_points(url,s=0.5,color='red'):
+    """
+    Plot all grid points where spectrum is available in NORA3 or WAM4 datasets (https://thredds.met.no)
+    url : link or nc-file for NORA3 or WAM4 dataset
+    e.g., url for NORA3: https://thredds.met.no/thredds/dodsC/windsurfer/mywavewam3km_spectra/2020/12/SPC2020123100.nc
+          url for WAM: https://thredds.met.no/thredds/dodsC/fou-hi/mywavewam4archive/2022/05/24/MyWave_wam4_SPC_20220524T00Z.nc
+    s : marker size
+    color: marker color
+    """
+    data = xr.open_dataset(url)
+    fig, ax = plt.subplots()
+    ax = plt.axes(projection=ccrs.Orthographic(-10, 45)) 
+    ax.stock_img()
+    #ax.add_feature(cfeature.LAND,color='darkkhaki')
+    #ax.add_feature(cfeature.LAKES)
+    #ax.coastlines(resolution='50m', color='darkkhaki', linewidth=0.5)
+    ax.scatter(data.longitude,data.latitude,s=s, marker='.', color=color, transform=ccrs.PlateCarree())
+    plt.title('Grid Points (2D Spectrum)',fontsize=18)
+    plt.show()
+    plt.savefig('spec_points.png',dpi=300)
+    return fig, ax
+    
 
 def plot_NorthPolarStereo(product, var,lon, lat, min_value,max_value,cmap,ax=None):
     if ax is None:
