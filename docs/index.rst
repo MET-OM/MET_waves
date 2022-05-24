@@ -17,7 +17,7 @@ Create the environment with the required dependencies and install met_waves:
 
 The package is under preparation. Some examples are given below:
 
- Plot all grid points that spectrum is available in NORA3 or WAM4 datasets (https://thredds.met.no)::
+ Plot all grid points that spectrum is available in NORA3/WAM4/WW3 datasets (https://thredds.met.no)::
  
    # example for NORA3:
    from met_waves import plot_grid_spec_points
