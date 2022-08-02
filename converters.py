@@ -7,6 +7,8 @@ Created on Mon Nov  8 08:58:23 2021
 import numpy as np
 import xarray as xr
 import scipy.io
+import pandas as pd
+
 
 
 def convert_HOS_3Ddat_to_netcdf(input_file,output_file):
@@ -120,3 +122,24 @@ def convert_swash_mat_to_netcdf(input_file,output_file,lon=[0,20],lat=[0,20], dt
     #save xarray to netcdf
     ds.to_netcdf(output_file)
     return ds
+
+
+def convert_REEF3D_FNPF_WSF_HG_to_netcdf(input_file,output_file):
+    """
+    Function to convert the REEF3D REEF3D_FNPF_WSF_HG.dat
+    to a netcdf file
+    Parameters:
+    input_file = file.data
+    output_file = filename.nc
+    ----------
+    time  : in seconds
+    P{x}  : surface elevation at gauge P{x} at potion x.
+    """
+    # read first line of the file to find the number of gauges
+    with open(input_file) as f:
+        line0 = f.readline()
+    nr_gauges = int(line0.split(' ')[-1])
+
+    df = pd.read_csv(input_file, skiprows=nr_gauges+5, header=0, delim_whitespace=True)
+    xr.Dataset(df.to_xarray()).to_netcdf(output_file) # convert dataframe to netcdf
+    return df
