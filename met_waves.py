@@ -15,6 +15,7 @@ import numpy as np
 import time
 import os
 from nco import Nco
+from cdo import Cdo
 
 
 
@@ -71,7 +72,7 @@ def plot_grid_spec_points(url,s=0.5,color='red'):
     """
     data = xr.open_dataset(url)
     fig, ax = plt.subplots()
-    ax = plt.axes(projection=ccrs.Orthographic(-10, 45)) 
+    ax = plt.axes(projection=ccrs.Orthographic(-10, 45))
     ax.stock_img()
     #ax.add_feature(cfeature.LAND,color='darkkhaki')
     #ax.add_feature(cfeature.LAKES)
@@ -81,7 +82,7 @@ def plot_grid_spec_points(url,s=0.5,color='red'):
     plt.show()
     plt.savefig('spec_points.png',dpi=300)
     return fig, ax
-    
+
 
 def plot_NorthPolarStereo(product, var,lon, lat, min_value,max_value,cmap,ax=None):
     if ax is None:
@@ -154,7 +155,7 @@ def plot_panarctic_map(start_time, end_time, product, variable, method, cmap='je
     Plots in a panarctic map a given variable
     start_time = start date for plotting e.g., '2005-01-07T18'
     end_time   = end date for plotting e.g., '2005-01-09T18'
-    Product: 'nora3' / 'wam4'  
+    Product: 'nora3' / 'wam4'
     variable: e.g., 'hs', 'tp', 'ff' for wind
     method: 'timestep' for plotting all timesteps for given period or 'mean'
     Overview of the NORAE3 wave variables is given in:
@@ -182,7 +183,7 @@ def plot_panarctic_map(start_time, end_time, product, variable, method, cmap='je
                                   var=var.loc[date_list[i]],lon=lon, lat=lat,
                                   min_value=min_value,max_value=max_value,
                                   cmap=cmap, ax=ax)
-            plt.title(product+','+str(date_list[i])+'UTC')
+            plt.title(variable+'['+var.units+']'+','+product+','+str(date_list[i])+'UTC')
             plt.savefig(variable+str(date_list[i])+'.png', bbox_inches='tight')
             plt.close()
     elif method == 'mean':
@@ -203,7 +204,7 @@ def get_url(product, day):
             '/SPC'+day.strftime('%Y%m%d')+'00.nc'
     elif product == 'SPEC_WW3':
         url = 'https://thredds.met.no/thredds/dodsC/ww3_4km_latest_files/' + \
-            'ww3_POI_SPC_'+day.strftime('%Y%m%d')+'T00Z.nc' 
+            'ww3_POI_SPC_'+day.strftime('%Y%m%d')+'T00Z.nc'
     elif product == 'NORA3':
         url = 'https://thredds.met.no/thredds/dodsC/windsurfer/mywavewam3km_files/' + \
             day.strftime('%Y') + '/'+day.strftime('%m') +  '/' + \
@@ -218,7 +219,7 @@ def plot_2D_spectra(start_time, end_time, lon, lat, product):
     end_time   : end date for plotting e.g., '2005-01-09T18'
     lon : longtitude
     lat   latitude
-    product: 'SPEC_NORA3' / 'SPEC_WW3'  
+    product: 'SPEC_NORA3' / 'SPEC_WW3'
     """
     data = []
     date_list = pd.date_range(start=start_time, end=end_time, freq='D')
@@ -265,10 +266,11 @@ def plot_2D_spectra(start_time, end_time, lon, lat, product):
         ax.set_xlabel(r'$\mathregular{\theta}[deg]$', labelpad=20)
         ax.set_title(product+"\n"+'lon.='+str(ds.longitude.values[xloc, yloc])+',lat='+str(ds.latitude.values[xloc, yloc])
                      + "\n"+str(SPEC['time'].values[i]).split(':')[0]
-                     + "\n"
-                             + r'$\theta_{p}$='
-                     + str(ds.direction.values[x_peak].round(2))+'deg'
-                     + "\n"+r'$T_{p}$='+str((1/ds.freq.values[y_peak]).round(2))+'s', fontsize=16)
+                     #+ "\n"
+                     #        + r'$\theta_{p}$='
+                     #+ str(ds.direction.values[x_peak].round(2))+'deg'
+                     #+ "\n"+r'$T_{p}$='+str((1/ds.freq.values[y_peak]).round(2))+'s'
+                     ,fontsize=16)
         plt.savefig('SPEC_lon'+str(ds.longitude.values[xloc, yloc])+'lat'+str(ds.latitude.values[xloc, yloc])
                     + str(SPEC['time'].values[i]).split(':')[0]+'.png', bbox_inches='tight')
         plt.close()
@@ -419,8 +421,11 @@ def extract_variable(start_date,end_date,variable,mean_method, product ='NORA3')
         for x in range(0, 6):  # try 6 times
             try:
                 if mean_method == None:
-                    opt = ['-O -v '+",".join(variable)]
-                    nco.ncks(input=infile , output=tempfile[i], options=opt)
+                    #opt = ['-O -v '+",".join(variable)]
+                    #nco.ncks(input=infile , output=tempfile[i], options=opt)
+                    if variable[0] == 'WEF':
+                        opt = ['-s '+"WEF=0.5*hs*hs*tmp"]
+                        nco.ncap2(input=infile , output=tempfile[i], options=opt)
                 elif mean_method == 'daily':
                     opt = ['-O -v '+",".join(variable)+' -d time,,,24,24']
                     nco.ncra(input=infile , output=tempfile[i], options=opt)
@@ -459,3 +464,52 @@ def plot_swan_spec2D(start_time, end_time,infile):
                   'm'+'$')
         plt.savefig(str(ds.time.values[i]).split(':')[0]+'.png',dpi=300)
         plt.close()
+        
+        
+        
+def download_WEF(start_date,end_date, product ='NORA3'):
+    """
+    Create WEF from NORA3 data and save it as netcdf (using cdo).
+    """
+    cdo = Cdo()
+    date_list = pd.date_range(start=start_date , end=end_date, freq='D')
+    outfile = "WEF"+'_'+date_list.strftime('%Y%m%d')[0]+'_'+date_list.strftime('%Y%m%d')[-1]+'.nc'
+
+    if os.path.exists(outfile):
+        os.remove(outfile)
+        print(outfile, 'already exists, so it will be deleted and create a new....')
+
+    else:
+        print("....")
+
+
+    outfile = [None] *len(date_list)
+    # Create directory
+    dirName = 'download'
+    try:
+        # Create target Directory
+        os.mkdir(dirName)
+        print("Directory " , dirName ,  " Created ")
+    except FileExistsError:
+        print("Directory " , dirName ,  " already exists")
+
+    # extract point and create temp files
+    for i in range(len(date_list)):
+        outfile[i] = 'download/WEF'+date_list.strftime('%Y%m%d')[i]+'.nc'
+        if product == 'NORA3':
+             infile = 'https://thredds.met.no/thredds/dodsC/windsurfer/mywavewam3km_files/'+date_list.strftime('%Y')[i]+'/'+date_list.strftime('%m')[i]+'/'+date_list.strftime('%Y%m%d')[i]+'_MyWam3km_hindcast.nc'
+             print(infile)
+
+
+        for x in range(0, 6):  # try 6 times
+            try:
+                #cdo_command = ['cdo', 'expr,WEF=0.5*hs*hs*tmp', infile, ]
+                #call(cdo_command)
+                cdo.expr("'WEF=0.5*hs*hs*tmp'",input=infile, output=outfile[i], options="-f nc")
+            except:
+                print('......Retry'+str(x)+'.....')
+                time.sleep(10)  # wait for 10 seconds before re-trying
+            else:
+                break
+
+    return

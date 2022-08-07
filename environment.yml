@@ -14,3 +14,5 @@ dependencies:
   - pynco
   - time
   - scipy
+  - python-cdo
+  - ipython
