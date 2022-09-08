@@ -1,4 +1,4 @@
-name: met_waves
+name: MET_waves
 channels:
   - conda-forge
 dependencies:
@@ -15,4 +15,5 @@ dependencies:
   - time
   - scipy
   - python-cdo
+  - pytest
   - ipython
