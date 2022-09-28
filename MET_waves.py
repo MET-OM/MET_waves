@@ -300,8 +300,7 @@ def plot_topaz(start_time, end_time, variable, method,save_data):
             plot_NorthPolarStereo(product=product,
                                   var=var.loc[date_list[i]],lon=var.longitude,
                                   lat=var.latitude,
-                                  min_value=min_value,max_value=max_value,
-                                  method=method)
+                                  min_value=min_value,max_value=max_value,cmap='ocean')
             plt.title(product+'\n '+str(date_list[i]))
             plt.savefig(variable + str(date_list[i]) +'.png', bbox_inches='tight')
             plt.close
@@ -312,8 +311,7 @@ def plot_topaz(start_time, end_time, variable, method,save_data):
                                   var=var.mean('time'),lon=var.longitude,
                                   lat=var.latitude,
                                   min_value=var.mean('time').min(),
-                                  max_value=var.mean('time').max(),
-                                  method=method)
+                                  max_value=var.mean('time').max(),cmap='ocean')
         plt.title(product+'\n Mean:'+start_time+'--'+end_time)
         plt.savefig(variable+'_Mean_'+start_time+'-'+end_time+'.png', bbox_inches='tight')
         plt.close()

@@ -19,7 +19,7 @@ Create the environment with the required dependencies and install MET_waves:
 The package is under preparation. Some examples are given below:
 
  Plot all grid points that spectrum is available in NORA3/WAM4/WW3 datasets (https://thredds.met.no)::
- 
+
    # example for NORA3:
    from MET_waves import plot_grid_spec_points
    url = 'https://thredds.met.no/thredds/dodsC/windsurfer/mywavewam3km_spectra/2020/12/SPC2020123100.nc'
@@ -29,7 +29,7 @@ The package is under preparation. Some examples are given below:
 
 .. image:: spec_points.png
   :width: 400
-  
+
 .. image:: zoom_spec_points.png
   :width: 400
 
@@ -81,8 +81,8 @@ Plot 2D spectra of a NORA3(product='SPEC_NORA3')/WW3(product='SPEC_WW3') grid po
 Plot TOPAZ data (use method='mean' to average over time or method='timestep' to get each timestep)::
 
    from MET_waves import plot_topaz
-   plot_topaz(start_time='1999-02-02',start_end='1999-02-03',
-              variable='fice',method = 'mean',save_data =True)
+   plot_topaz(start_time='1999-02-02',end_time='1999-02-03',
+              variable='fice',method = 'timestep',save_data =True)
 
 .. code-block:: rst
 
