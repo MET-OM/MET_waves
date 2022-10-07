@@ -62,7 +62,7 @@ For long time series, please use the following function that extracts times seri
    from MET_waves import extract_ts_point
    extract_ts_point(start_date ='2019-01-01',
                     end_date= '2019-01-31',
-                    variable=['hs','tp','hs_swell','tp_swell'],
+                    variable=['hs','tp','hs_swell','tp_swell', 'ff'],
                     lon = 5, lat = 60,
                     product='NORA3')
 .. code-block:: rst
