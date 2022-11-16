@@ -7,7 +7,17 @@ Welcome to MET_waves's documentation!
 =====================================
 Tools for data analysis and visualization of MET Norway (https://www.met.no/) wave datasets (e.g., NORA3, WAM4).
 
-Create the environment with the required dependencies and install MET_waves:
+Installing **MET_waves**
+=============================================
+1. Install anaconda3 or miniconda3
+2. Clone MET_waves:
+
+.. code-block:: bash
+
+   $ git clone https://github.com/KonstantinChri/MET_waves.git
+   $ cd MET_waves/
+
+3. Create the environment with the required dependencies and install MET_waves:
 
 .. code-block:: bash
 
@@ -15,6 +25,9 @@ Create the environment with the required dependencies and install MET_waves:
   $ conda env create -f environment.yml
   $ conda activate MET_waves
   $ pip install -e .
+
+Examples
+=============================================
 
 The package is under preparation. Some examples are given below:
 
