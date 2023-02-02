@@ -214,7 +214,7 @@ def get_url(product, day):
 
 def plot_2D_spectra(start_time, end_time, lon, lat, product):
     """
-    Plots in a panarctic map a given variable
+    Plot 2D spectra for a given time period
     start_time : start date for plotting e.g., '2005-01-07T18'
     end_time   : end date for plotting e.g., '2005-01-09T18'
     lon : longtitude
@@ -278,7 +278,7 @@ def plot_2D_spectra(start_time, end_time, lon, lat, product):
 
 def extract_2D_spectra(start_time, end_time, lon, lat, product):
     """
-    Plots in a panarctic map a given variable
+    Extract and Save (in netcdf format) 2D spectra for a given time period
     start_time : start date for plotting e.g., '2005-01-07T18'
     end_time   : end date for plotting e.g., '2005-01-09T18'
     lon : longtitude
