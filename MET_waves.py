@@ -276,6 +276,36 @@ def plot_2D_spectra(start_time, end_time, lon, lat, product):
         plt.close()
 
 
+def extract_2D_spectra(start_time, end_time, lon, lat, product):
+    """
+    Plots in a panarctic map a given variable
+    start_time : start date for plotting e.g., '2005-01-07T18'
+    end_time   : end date for plotting e.g., '2005-01-09T18'
+    lon : longtitude
+    lat   latitude
+    product: 'SPEC_NORA3' / 'SPEC_WW3'
+    """
+    data = []
+    date_list = pd.date_range(start=start_time, end=end_time, freq='D')
+    for k in range(len(date_list)):  # loop over days
+        url = get_url(product, date_list[k])
+        ds = xr.open_dataset(url)
+        # Find the nearest grid point.
+        abslat = np.abs(ds.latitude-lat)
+        abslon = np.abs(ds.longitude-lon)
+        c = np.maximum(abslon, abslat)
+        ([xloc], [yloc]) = np.where(c == np.min(c))
+        print('Nearest point lon, lat:'
+              + str(ds.longitude.values[xloc, yloc])+','+str(ds.latitude.values[xloc, yloc]))
+        data.append(ds.SPEC[:, xloc, yloc, :, :])
+        SPEC = xr.concat(data, dim='time')
+    SPEC = SPEC.sel(time=slice(start_time, end_time))
+    SPEC.to_netcdf('SPEC_lon'+str(ds.longitude.values[xloc, yloc])+'_lat'+str(ds.latitude.values[xloc, yloc])
+                    +'_'+ str(SPEC['time'].values[0]).split(':')[0]+'_'+ str(SPEC['time'].values[-1]).split(':')[0]+'.nc')
+
+    return SPEC
+
+
 def plot_topaz(start_time, end_time, variable, method,save_data):
     """
     info about the hindcast: https://thredds.met.no/thredds/myocean/ARC-MFC/arc-topaz-ran-arc.html
