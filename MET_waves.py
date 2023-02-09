@@ -542,6 +542,28 @@ def download_WEF(start_date,end_date, product ='NORA3'):
 
     return
 
+def plot_WW3_forecast(url):
+    ds = xr.open_dataset(url)
+    print(url)
+    cut=8
+    print('Hs',ds.hs.max())
+    cmap_waves = create_cmap(type='wave')
+
+    for i in range(ds.time.shape[0]):
+        fig,ax = plt.subplots(figsize=(8,6), subplot_kw={"projection": ccrs.Orthographic(-15,60)})
+        levels = np.round(np.linspace(0,int(ds.hs.max()+1),int(ds.hs.max())*10),1)
+        im = ax.contourf(ds.longitude, ds.latitude,ds.hs.loc[ds.time[i]],levels = levels, transform = ccrs.PlateCarree(),cmap=cmap_waves) #ocean_r, coolwarm
+        plt.title('WW3_4km,'+str(ds.time.values[i])[:13] +'UTC')
+        ax.coastlines('50m')
+        ax.stock_img()
+        ax.add_feature(cartopy.feature.OCEAN, facecolor='white')
+        cbar_ax = fig.add_axes([0.8, 0.12, 0.05, 0.7])
+        cbar_ax.set_title('$'+'H_s[m]'+'$')
+        fig.colorbar(im, cax=cbar_ax)
+        ax.gridlines(xlocs=range(-180,180,10),ylocs=range(-90, 90, 10),color='black',linestyle='dotted',draw_labels=True)
+        plt.savefig(str(ds.time.values[i])[:13]+'_Hs.png',bbox_inches = 'tight')
+        plt.close()
+        
 
 def create_cmap(type = 'wave'):
     from matplotlib.colors import ListedColormap
