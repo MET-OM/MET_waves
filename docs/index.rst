@@ -91,6 +91,16 @@ Plot 2D spectra of a NORA3(product='SPEC_NORA3')/WW3(product='SPEC_WW3') grid po
 .. image:: spec_nora3.png
   :width: 400
 
+Plot WW3_4km forecast::
+
+   from MET_waves import plot_WW3_forecast
+   plot_WW3_forecast('https://thredds.met.no/thredds/dodsC/ww3_4km_latest_files/ww3_20230217T06Z.nc')
+.. code-block:: rst
+
+.. image:: 2023-02-17T15_Hs.png
+  :width: 400
+
+
 Plot TOPAZ data (use method='mean' to average over time or method='timestep' to get each timestep)::
 
    from MET_waves import plot_topaz
