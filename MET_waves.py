@@ -543,7 +543,7 @@ def download_WEF(start_date,end_date, product ='NORA3'):
     return
 
 def plot_MET_forecast(url):
-    "url: opendap url of WW3_4km or WAM800 models at thredds.met.no" 
+    "url: opendap link of WW3_4km or WAM800 models from thredds.met.no (MET Norway)" 
     ds = xr.open_dataset(url)
     print(url)
     cut=8
