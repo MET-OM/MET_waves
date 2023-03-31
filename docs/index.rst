@@ -94,7 +94,7 @@ Plot 2D spectra of a NORA3(product='SPEC_NORA3')/WW3(product='SPEC_WW3') grid po
 Plot WW3_4km forecast::
 
    from MET_waves import plot_WW3_forecast
-   plot_WW3_forecast('https://thredds.met.no/thredds/dodsC/ww3_4km_latest_files/ww3_20230217T06Z.nc')
+   plot_MET_forecast('https://thredds.met.no/thredds/dodsC/ww3_4km_latest_files/ww3_20230217T06Z.nc')
 .. code-block:: rst
 
 .. image:: 2023-02-17T15_Hs.png
