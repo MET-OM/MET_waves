@@ -100,6 +100,15 @@ Plot WW3_4km forecast::
 .. image:: 2023-02-17T15_Hs.png
   :width: 400
 
+Plot SWAN 2D spectrum::
+
+   from MET_waves import plot_swan_spec2D
+   plot_swan_spec2D(start_time='2020-12-17T16', end_time='2020-12-17T17',infile='SWAN_spec.nc', site=0)
+.. code-block:: rst
+
+.. image:: 2020-12-17T16.png
+  :width: 400
+
 
 Plot TOPAZ data (use method='mean' to average over time or method='timestep' to get each timestep)::
 
