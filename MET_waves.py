@@ -472,7 +472,7 @@ def extract_variable(start_date,end_date,variable,mean_method, product ='NORA3')
 
     return
 
-def plot_swan_spec2D(start_time, end_time,infile):
+def plot_swan_spec2D(start_time, end_time,infile, site=0):
     from wavespectra import read_ncswan
     ds = read_ncswan(infile).sel(time=slice(start_time, end_time))
     hs_spec = ds.isel(site=0).efth.spec.hs()
@@ -482,7 +482,7 @@ def plot_swan_spec2D(start_time, end_time,infile):
     vmin=ds.efth.min()
     for i in range(ds.time.shape[0]):
         ax = plt.subplot(111, polar=True)
-        ds.isel(site=0,time=i).efth.spec.split(fmin=0.04).spec.plot(kind="contourf", cmap="ocean_r", as_period=True,normalised=True)
+        ds.isel(site=site,time=i).efth.spec.split(fmin=0.04).spec.plot(kind="contourf", cmap="ocean_r", as_period=True,normalised=True)
         ax.set_theta_zero_location("N")
         ax.set_theta_direction(-1)
         ax.set_xticklabels(['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'])
