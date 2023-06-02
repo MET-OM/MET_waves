@@ -482,7 +482,7 @@ def plot_swan_spec2D(start_time, end_time,infile):
     vmin=ds.efth.min()
     for i in range(ds.time.shape[0]):
         ax = plt.subplot(111, polar=True)
-        ds.isel(site=0,time=i).efth.spec.split(fmin=0.04).spec.plot.contourf(cmap="ocean_r",vmin=vmin, vmax=vmax,levels=25, as_period=True,as_log10=False)
+        ds.isel(site=0,time=i).efth.spec.split(fmin=0.04).spec.plot(kind="contourf", cmap="ocean_r", as_period=True,normalised=True)
         ax.set_theta_zero_location("N")
         ax.set_theta_direction(-1)
         ax.set_xticklabels(['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'])
@@ -543,7 +543,7 @@ def download_WEF(start_date,end_date, product ='NORA3'):
     return
 
 def plot_MET_forecast(url):
-    "url: opendap link of WW3_4km or WAM800 models from thredds.met.no (MET Norway)" 
+    "url: opendap link of WW3_4km or WAM800 models from thredds.met.no (MET Norway)"
     ds = xr.open_dataset(url)
     print(url)
     cut=8
@@ -564,7 +564,7 @@ def plot_MET_forecast(url):
         ax.gridlines(xlocs=range(-180,180,10),ylocs=range(-90, 90, 10),color='black',linestyle='dotted',draw_labels=True)
         plt.savefig(ds.title.split(' ')[0] +'_' + str(ds.time.values[i])[:13]+'_Hs.png',bbox_inches = 'tight')
         plt.close()
-        
+
 
 def create_cmap(type = 'wave'):
     from matplotlib.colors import ListedColormap
