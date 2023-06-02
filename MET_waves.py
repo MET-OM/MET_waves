@@ -490,7 +490,7 @@ def plot_swan_spec2D(start_time, end_time,infile, site=0):
         ax.set_xlabel('')
         plt.title('$'+'lon.:'+str(ds.lon.values[0].round(2))+','+'lat.:'+str(ds.lat.values[0].round(2))+','+str(ds.time.values[i]).split(':')[0]+', H_{m0}:'+str(hs_spec.values[i].round(1))+
                   'm'+'$')
-        plt.savefig(str(ds.time.values[i]).split(':')[0]+'.png',dpi=300)
+        plt.savefig(str(ds.time.values[i]).split(':')[0]+'_site'+str(site)+'.png',dpi=300)
         plt.close()
 
 
