@@ -406,12 +406,12 @@ def extract_ts_point(start_date,end_date,variable, lon, lat, product ='NORA3'):
     #merge temp files
     nco.ncrcat(input=tempfile, output=outfile)
 
-    # add lon, lat in nc-file
+    # add lon, lat info in nc-file
     ds = xr.open_dataset(outfile)
     ds['lon'] =  lon_near
     ds['lat'] =  lat_near
     ds.to_netcdf(outfile)
-
+    
     #remove temp files
     for i in range(len(date_list)):
         os.remove(tempfile[i])
