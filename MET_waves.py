@@ -406,6 +406,12 @@ def extract_ts_point(start_date,end_date,variable, lon, lat, product ='NORA3'):
     #merge temp files
     nco.ncrcat(input=tempfile, output=outfile)
 
+    # add lon, lat in nc-file
+    ds = xr.open_dataset(outfile)
+    ds['lon'] =  lon_near
+    ds['lat'] =  lat_near
+    ds.to_netcdf(outfile)
+
     #remove temp files
     for i in range(len(date_list)):
         os.remove(tempfile[i])
@@ -565,6 +571,21 @@ def plot_MET_forecast(url):
         plt.savefig(ds.title.split(' ')[0] +'_' + str(ds.time.values[i])[:13]+'_Hs.png',bbox_inches = 'tight')
         plt.close()
 
+def plot_SWAN_map(url='Ianos500m_st6_20200914.nc',var='hs', start_time='2020-09-14T12', end_time='2020-09-20T16', point=None, cmap='jet'):
+    ds = xr.open_dataset(url).sel(time=slice(start_time, end_time))
+    print('max '+var,ds[var].max())
+    for i in range(ds.time.shape[0]):
+        fig, ax = plt.subplots()
+        levels = np.round(np.linspace(0,int(ds[var].max()+1),int(ds[var].max()+1)*10),1)
+        im = ax.contourf(ds.longitude, ds.latitude,ds[var].loc[ds.time[i]],levels = levels,cmap=cmap) #, transform = ccrs.PlateCarree(),cmap='coolwarm') # coolwarm         
+        if point is not None:
+           plt.plot(point[0],point[1],marker ='^',color='magenta', markersize=8)
+        plt.title('DNORA/SWAN,'+str(ds.time.values[i])[:13] +'UTC')
+        cbar_ax = plt.colorbar(im) 
+        cbar_ax.ax.set_title('$['+ds[var].units+']$')
+        ax.set_facecolor('beige')
+        plt.savefig(str(ds.time.values[i])[:13]+'_'+var+'.png',bbox_inches = 'tight',dpi=300)
+        plt.close()
 
 def create_cmap(type = 'wave'):
     from matplotlib.colors import ListedColormap
