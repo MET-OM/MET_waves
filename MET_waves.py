@@ -579,7 +579,9 @@ def plot_SWAN_map(url='Ianos500m_st6_20200914.nc',var='hs', start_time='2020-09-
         levels = np.round(np.linspace(0,int(ds[var].max()+1),int(ds[var].max()+1)*10),1)
         im = ax.contourf(ds.longitude, ds.latitude,ds[var].loc[ds.time[i]],levels = levels,cmap=cmap) #, transform = ccrs.PlateCarree(),cmap='coolwarm') # coolwarm         
         if point is not None:
-           plt.plot(point[0],point[1],marker ='^',color='magenta', markersize=8)
+            for j in range(len(point)):
+                p = point[j]
+                plt.plot(p[0],p[1],marker ='^',color='magenta', markersize=8)
         plt.title('DNORA/SWAN,'+str(ds.time.values[i])[:13] +'UTC')
         cbar_ax = plt.colorbar(im) 
         cbar_ax.ax.set_title('$['+ds[var].units+']$')
