@@ -573,11 +573,16 @@ def plot_MET_forecast(url):
 
 def plot_SWAN_map(url='Ianos500m_st6_20200914.nc',var='hs', start_time='2020-09-14T12', end_time='2020-09-20T16', point=None, cmap='jet'):
     ds = xr.open_dataset(url).sel(time=slice(start_time, end_time))
+    if var=='wind':
+        ds['wind'] = (ds['xwnd']**2 + ds['ywnd']**2)**(1/2)
+        ds['wind'].attrs['units'] = 'm/s'
     print('max '+var,ds[var].max())
     for i in range(ds.time.shape[0]):
         fig, ax = plt.subplots()
         levels = np.round(np.linspace(0,int(ds[var].max()+1),int(ds[var].max()+1)*10),1)
-        im = ax.contourf(ds.longitude, ds.latitude,ds[var].loc[ds.time[i]],levels = levels,cmap=cmap) #, transform = ccrs.PlateCarree(),cmap='coolwarm') # coolwarm         
+        im = ax.contourf(ds.longitude, ds.latitude,ds[var].loc[ds.time[i]],levels = levels,cmap=cmap) #, transform = ccrs.PlateCarree(),cmap='coolwarm') # coolwarm  
+        if var=='wind': 
+            ax.quiver(ds.longitude[::50], ds.latitude[::50],ds['xwnd'].loc[ds.time[i]][::50,::50],ds['ywnd'].loc[ds.time[i]][::50,::50],linewidths=0.01)       
         if point is not None:
             for j in range(len(point)):
                 p = point[j]
@@ -588,6 +593,9 @@ def plot_SWAN_map(url='Ianos500m_st6_20200914.nc',var='hs', start_time='2020-09-
         ax.set_facecolor('beige')
         plt.savefig(str(ds.time.values[i])[:13]+'_'+var+'.png',bbox_inches = 'tight',dpi=300)
         plt.close()
+
+def new_func():
+    return 50
 
 def create_cmap(type = 'wave'):
     from matplotlib.colors import ListedColormap
