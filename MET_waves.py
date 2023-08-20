@@ -481,7 +481,7 @@ def extract_variable(start_date,end_date,variable,mean_method, product ='NORA3')
 def plot_swan_spec2D(start_time, end_time,infile, site=0):
     from wavespectra import read_ncswan
     ds = read_ncswan(infile).sel(time=slice(start_time, end_time))
-    hs_spec = ds.isel(site=0).efth.spec.hs()
+    hs_spec = ds.isel(site=site).efth.spec.hs()
     # tp_spec = ds.isel(site=0).efth.spec.tp()
     # dp_spec = ds.isel(site=0).efth.spec.dp()
     vmax=ds.efth.max()
@@ -494,9 +494,9 @@ def plot_swan_spec2D(start_time, end_time,infile, site=0):
         ax.set_xticklabels(['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'])
         ax.set_ylabel('')
         ax.set_xlabel('')
-        plt.title('$'+'lon.:'+str(ds.lon.values[0].round(2))+','+'lat.:'+str(ds.lat.values[0].round(2))+','+str(ds.time.values[i]).split(':')[0]+', H_{m0}:'+str(hs_spec.values[i].round(1))+
+        plt.title('$'+'lon.:'+str(ds.lon.values[site].round(2))+','+'lat.:'+str(ds.lat.values[site].round(2))+','+str(ds.time.values[i]).split(':')[0]+', H_{m0}:'+str(hs_spec.values[i].round(1))+
                   'm'+'$')
-        plt.savefig(str(ds.time.values[i]).split(':')[0]+'_site'+str(site)+'.png',dpi=300)
+        plt.savefig(str(ds.time.values[i]).split(':')[0]+'_site'+str(site)+'.png')
         plt.close()
 
 
@@ -591,11 +591,9 @@ def plot_SWAN_map(url='Ianos500m_st6_20200914.nc',var='hs', start_time='2020-09-
         cbar_ax = plt.colorbar(im) 
         cbar_ax.ax.set_title('$['+ds[var].units+']$')
         ax.set_facecolor('beige')
-        plt.savefig(str(ds.time.values[i])[:13]+'_'+var+'.png',bbox_inches = 'tight',dpi=300)
+        plt.savefig(str(ds.time.values[i])[:13]+'_'+var+'.png',bbox_inches = 'tight')
         plt.close()
 
-def new_func():
-    return 50
 
 def create_cmap(type = 'wave'):
     from matplotlib.colors import ListedColormap
