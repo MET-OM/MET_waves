@@ -571,7 +571,7 @@ def plot_MET_forecast(url):
         plt.savefig(ds.title.split(' ')[0] +'_' + str(ds.time.values[i])[:13]+'_Hs.png',bbox_inches = 'tight')
         plt.close()
 
-def plot_SWAN_map(url='Ianos500m_st6_20200914.nc',var='hs', start_time='2020-09-14T12', end_time='2020-09-20T16', point=None, cmap='jet'):
+def plot_SWAN_map(url='Ianos500m_st6_20200914.nc',var='hs', start_time='2020-09-14T12', end_time='2020-09-20T16',max_value=None, point=None, cmap='jet'):
     ds = xr.open_dataset(url).sel(time=slice(start_time, end_time))
     if var=='wind':
         ds['wind'] = (ds['xwnd']**2 + ds['ywnd']**2)**(1/2)
@@ -579,7 +579,10 @@ def plot_SWAN_map(url='Ianos500m_st6_20200914.nc',var='hs', start_time='2020-09-
     print('max '+var,ds[var].max())
     for i in range(ds.time.shape[0]):
         fig, ax = plt.subplots()
-        levels = np.round(np.linspace(0,int(ds[var].max()+1),int(ds[var].max()+1)*10),1)
+        if max_value==None:
+            levels = np.round(np.linspace(0,int(ds[var].max()+1),int(ds[var].max()+1)*10),1)
+        else:
+            levels = np.round(np.linspace(0,int(max_value),int(max_value)*10),1)
         im = ax.contourf(ds.longitude, ds.latitude,ds[var].loc[ds.time[i]],levels = levels,cmap=cmap) #, transform = ccrs.PlateCarree(),cmap='coolwarm') # coolwarm  
         if var=='wind': 
             ax.quiver(ds.longitude[::50], ds.latitude[::50],ds['xwnd'].loc[ds.time[i]][::50,::50],ds['ywnd'].loc[ds.time[i]][::50,::50],linewidths=0.01)       
